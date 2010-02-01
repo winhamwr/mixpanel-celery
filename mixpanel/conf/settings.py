@@ -21,7 +21,7 @@ from django.conf import settings
     URL for the mixpanel api server. This probably shouldn't change.
 """
 MIXPANEL_API_SERVER = getattr(settings, 'MIXPANEL_API_SERVER',
-                               'http://api.mixpanel.com')
+                               'api.mixpanel.com')
 
 """
 .. data:: MIXPANEL_TRACKING_ENDPOINT
