@@ -1,4 +1,4 @@
-import subprocess
+import httplib
 import base64
 import simplejson
 import urlparse
@@ -26,9 +26,10 @@ class EventTracker(Task):
         """
         properties = self._handle_properties(properties, token)
 
-        request = self._build_request(event, properties)
+        url = self._build_url(event, properties)
+        conn = self._get_connection()
 
-        return self._send_request(request)
+        return self._send_request(conn, url)
 
     def _handle_properties(self, properties, token):
         """
@@ -42,28 +43,27 @@ class EventTracker(Task):
         if token not in properties:
             properties['token'] = token
 
-    def _build_request(self, event, properties):
+    def _get_connection(self):
+        server = mp_settings.MIXPANEL_API_SERVER
+
+        return httplib.HTTPConnection(server)
+
+    def _build_url(self, event, properties):
         """
-        Build an http request to record the given event and properties.
+        Build an http request URL to record the given event and properties.
         """
         params = {'event': event, 'properties': properties}
         data = base64.b64encode(simplejson.dumps(params))
 
-        server = mp_settings.MIXPANEL_API_SERVER
-        endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
-        data_var = mp_settings.MIXPANEL_DATA_VARIABLE
+        url = endpoint + '?%s=%s' (data_var, data)
 
-        url = urlparse.urljoin(server, endpoint)
-        request = url + '?%s=%s' (data_var, data)
+        return url
 
-        return request
-
-    def _send_request(self, request):
+    def _send_request(self, connection, url):
         """
         Send a an event with its properties to the api server.
         """
-        sub = subprocess.Popen(['curl', request], stderr=subprocess.PIPE,
-                               stdout=subprocess.PIPE)
+        connection.request('GET', url)
 
 tasks.register(EventTracker)
 
@@ -98,7 +98,7 @@ class FunnelEventTracker(EventTracker):
         properties['step'] = step
         properties['goal'] = goal
 
-        request = self._build_request(mp_settings.MIXPANEL_FUNNEL_EVENT_ID,
-                                      properties)
+        url = self._build_url(mp_settings.MIXPANEL_FUNNEL_EVENT_ID, properties)
+        conn = self._get_connection()
 
-        return self._send_request(request)
+        return self._send_request(conn, url)
