@@ -1,4 +1,5 @@
 import httplib
+import urllib
 import base64
 import simplejson
 import urlparse
@@ -26,10 +27,10 @@ class EventTracker(Task):
         """
         properties = self._handle_properties(properties, token)
 
-        url = self._build_url(event_name, properties)
+        url_params = self._build_params(event_name, properties)
         conn = self._get_connection()
 
-        return self._send_request(conn, url)
+        return self._send_request(conn, url_params)
 
     def _handle_properties(self, properties, token):
         """
@@ -50,30 +51,39 @@ class EventTracker(Task):
 
         return httplib.HTTPConnection(server)
 
-    def _build_url(self, event, properties):
+    def _build_params(self, event, properties):
         """
-        Build an http request URL to record the given event and properties.
+        Build HTTP params to record the given event and properties.
         """
         params = {'event': event, 'properties': properties}
         data = base64.b64encode(simplejson.dumps(params))
 
-        endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
         data_var = mp_settings.MIXPANEL_DATA_VARIABLE
+        url_params = urllib.urlencode({data_var: data})
 
-        url = '%s?%s=%s' % (endpoint, data_var, data)
+        self.url_params = url_params
 
-        return url
+        return url_params
 
-    def _send_request(self, connection, url):
+    def _send_request(self, connection, params):
         """
         Send a an event with its properties to the api server.
 
         Returns ``true`` if the response had a 200 status.
         """
-        connection.request('GET', url)
+        endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
+        connection.request('GET', endpoint, params)
 
         response = connection.getresponse()
-        return response.status == 200
+        if response.status != 200:
+            return False
+
+        # Successful requests will generate a log
+        response_data = response.read()
+        if response_data != '1':
+            return False
+
+        return True
 
 tasks.register(EventTracker)
 
@@ -103,10 +113,10 @@ class FunnelEventTracker(EventTracker):
 
         properties = self._add_funnel_properties(properties, funnel, step, goal)
 
-        url = self._build_url(mp_settings.MIXPANEL_FUNNEL_EVENT_ID, properties)
+        url_params = self._build_params(mp_settings.MIXPANEL_FUNNEL_EVENT_ID, properties)
         conn = self._get_connection()
 
-        return self._send_request(conn, url)
+        return self._send_request(conn, url_params)
 
     def _add_funnel_properties(self, properties, funnel, step, goal):
         if not properties.has_key('distinct_id') and not properties.has_key('ip'):

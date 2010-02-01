@@ -1,6 +1,7 @@
 import unittest
 import base64
 import simplejson
+import urllib
 
 from mixpanel.tasks import EventTracker, FunnelEventTracker
 from mixpanel.conf import settings as mp_settings
@@ -27,27 +28,32 @@ class EventTrackerTest(unittest.TestCase):
         properties = et._handle_properties(None, None)
         self.assertEqual('bar', properties['token'])
 
-    def test_build_url(self):
+    def test_build_params(self):
         et = EventTracker()
 
         event = 'foo_event'
         properties = {'token': 'testtoken'}
         params = {'event': event, 'properties': properties}
 
-        url = et._build_url(event, properties)
+        url_params = et._build_params(event, properties)
 
-        expected_data = base64.b64encode(simplejson.dumps(params))
+        expected_params = urllib.urlencode({'data':base64.b64encode(simplejson.dumps(params))})
 
-        self.assertEqual('track/?data=%s' % expected_data, url)
+        self.assertEqual(expected_params, url_params)
 
     def test_run(self):
-        mp_settings.MIXPANEL_API_SERVER = '127.0.0.1'
-        mp_settings.MIXPANEL_API_TOKEN = 'bar'
+        # "correct" result obtained from: http://mixpanel.com/api/docs/console
+        mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
 
         et = EventTracker()
-        result = et.run('event_foo')
+        result = et.run('event_foo', {'test': 1})
 
-        self.assertFalse(result)
+        # non-url quoted :(
+        # eyJldmVudCI6ICJldmVudF9mb28iLCJwcm9wZXJ0aWVzIjogeyJ0b2tlbiI6ICJ0ZXN0dGVzdHRlc3QiLCJ0ZXN0IjogIjEifX0=
+        self.assertEqual('data=eyJldmVudCI6ICJldmVudF9mb28iLCJwcm9wZXJ0aWVzIjogeyJ0b2tlbiI6ICJ0ZXN0dGVzdHRlc3QiLCJ0ZXN0IjogIjEifX0=',
+                        et.url_params)
+
+        self.assertTrue(result)
 
 class FunnelEventTrackerTest(unittest.TestCase):
     def test_afp_validation(self):
@@ -93,10 +99,9 @@ class FunnelEventTrackerTest(unittest.TestCase):
         self.assertEqual(funnel_properties['goal'], goal)
 
     def test_run(self):
-        mp_settings.MIXPANEL_API_SERVER = '127.0.0.1'
-        mp_settings.MIXPANEL_API_TOKEN = 'bar'
+        mp_settings.MIXPANEL_API_TOKEN = getattr(mp_settings, 'MIXPANEL_API_TOKEN', 'TEST')
 
         fet = FunnelEventTracker()
-        result = fet.run('funnel_foo', '1', '3', {'ip': 'foo'})
+        result = fet.run('funnel_foo', '1', '3', {'ip': '127.0.0.1', 'test': 1})
 
-        self.assertFalse(result)
+        self.assertTrue(result)
