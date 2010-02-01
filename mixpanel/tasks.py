@@ -4,7 +4,7 @@ import simplejson
 import urlparse
 
 from celery.task import Task
-from celery.registry import tasks
+from celery.registry import tasks, AlreadyRegistered
 
 from mixpanel.conf import settings as mp_settings
 
@@ -26,7 +26,7 @@ class EventTracker(Task):
         """
         properties = self._handle_properties(properties, token)
 
-        url = self._build_url(event, properties)
+        url = self._build_url(event_name, properties)
         conn = self._get_connection()
 
         return self._send_request(conn, url)
@@ -43,6 +43,8 @@ class EventTracker(Task):
         if token not in properties:
             properties['token'] = token
 
+        return properties
+
     def _get_connection(self):
         server = mp_settings.MIXPANEL_API_SERVER
 
@@ -55,15 +57,23 @@ class EventTracker(Task):
         params = {'event': event, 'properties': properties}
         data = base64.b64encode(simplejson.dumps(params))
 
-        url = endpoint + '?%s=%s' (data_var, data)
+        endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
+        data_var = mp_settings.MIXPANEL_DATA_VARIABLE
+
+        url = '%s?%s=%s' % (endpoint, data_var, data)
 
         return url
 
     def _send_request(self, connection, url):
         """
         Send a an event with its properties to the api server.
+
+        Returns ``true`` if the response had a 200 status.
         """
         connection.request('GET', url)
+
+        response = connection.getresponse()
+        return response.status == 200
 
 tasks.register(EventTracker)
 
@@ -76,7 +86,7 @@ class FunnelEventTracker(EventTracker):
         """Required properties were missing from the funnel-tracking call"""
         pass
 
-    def run(self, funnel, step, goal, properties=None, token=None):
+    def run(self, funnel, step, goal, properties, token=None):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -91,6 +101,14 @@ class FunnelEventTracker(EventTracker):
         """
         properties = self._handle_properties(properties, token)
 
+        properties = self._add_funnel_properties(properties, funnel, step, goal)
+
+        url = self._build_url(mp_settings.MIXPANEL_FUNNEL_EVENT_ID, properties)
+        conn = self._get_connection()
+
+        return self._send_request(conn, url)
+
+    def _add_funnel_properties(self, properties, funnel, step, goal):
         if not properties.has_key('distinct_id') and not properties.has_key('ip'):
             error_msg = "Either a ``distinct_id`` or ``ip`` property must be given to record a funnel event"
             raise FunnelEventTracker.InvalidFunnelProperties(error_msg)
@@ -98,7 +116,10 @@ class FunnelEventTracker(EventTracker):
         properties['step'] = step
         properties['goal'] = goal
 
-        url = self._build_url(mp_settings.MIXPANEL_FUNNEL_EVENT_ID, properties)
-        conn = self._get_connection()
+        return properties
 
-        return self._send_request(conn, url)
+
+try:
+    tasks.register(FunnelEventTracker)
+except AlreadyRegistered:
+    pass
