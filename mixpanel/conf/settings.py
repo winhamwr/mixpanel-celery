@@ -20,7 +20,7 @@ from django.conf import settings
 
     URL for the mixpanel api server. This probably shouldn't change.
 """
-MIXPANEL_API_SERVER = gettattr(settings, 'MIXPANEL_API_SERVER',
+MIXPANEL_API_SERVER = getattr(settings, 'MIXPANEL_API_SERVER',
                                'http://api.mixpanel.com')
 
 """
@@ -30,7 +30,7 @@ MIXPANEL_API_SERVER = gettattr(settings, 'MIXPANEL_API_SERVER',
 
     Mind the trailing slash.
 """
-MIXPANEL_TRACKING_ENDPOINT = gettattr(settings, 'MIXPANEL_TRACKING_ENDPOINT',
+MIXPANEL_TRACKING_ENDPOINT = getattr(settings, 'MIXPANEL_TRACKING_ENDPOINT',
                                'track/')
 
 """
@@ -39,7 +39,7 @@ MIXPANEL_TRACKING_ENDPOINT = gettattr(settings, 'MIXPANEL_TRACKING_ENDPOINT',
     Name of the http GET variable used for transferring property information
     when registering events.
 """
-MIXPANEL_DATA_VARIABLE = gettattr(settings, 'MIXPANEL_DATA_VARIABLE',
+MIXPANEL_DATA_VARIABLE = getattr(settings, 'MIXPANEL_DATA_VARIABLE',
                                'data')
 
 
@@ -49,5 +49,5 @@ MIXPANEL_DATA_VARIABLE = gettattr(settings, 'MIXPANEL_DATA_VARIABLE',
     The event identifier that indicates that a funnel is being tracked and not
     just a normal event.
 """
-MIXPANEL_FUNNEL_EVENT_ID = gettattr(settings, 'MIXPANEL_FUNNEL_EVENT_ID',
+MIXPANEL_FUNNEL_EVENT_ID = getattr(settings, 'MIXPANEL_FUNNEL_EVENT_ID',
                                'mp_funnel')
