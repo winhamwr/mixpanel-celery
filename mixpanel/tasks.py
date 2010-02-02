@@ -3,6 +3,7 @@ import urllib
 import base64
 import simplejson
 import urlparse
+import logging
 
 from celery.task import Task
 from celery.registry import tasks, AlreadyRegistered
@@ -31,12 +32,17 @@ class EventTracker(Task):
         """
         logger = self.get_logger(**kwargs)
         logger.info("Recording event: <%s>" % event_name)
+        if logger.getEffectiveLevel() == logging.DEBUG:
+            httplib.HTTPConnection.debuglevel = 1
+
         properties = self._handle_properties(properties, token)
 
         url_params = self._build_params(event_name, properties)
+        logger.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
 
         result = self._send_request(conn, url_params)
+        conn.close()
         if result:
             logger.info("Event recorded/logged: <%s>" % event_name)
         else:
@@ -82,7 +88,7 @@ class EventTracker(Task):
         Returns ``true`` if the response had a 200 status.
         """
         endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
-        connection.request('GET', endpoint, params)
+        connection.request('GET', '%s?%s' % (endpoint, params))
 
         response = connection.getresponse()
         if response.status != 200:
