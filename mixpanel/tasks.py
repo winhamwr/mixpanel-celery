@@ -18,7 +18,7 @@ class EventTracker(Task):
         """The attempted recording event failed because of a non-200 HTTP return code"""
         pass
 
-    def run(self, event_name, properties=None, token=None):
+    def run(self, event_name, properties=None, token=None, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -29,12 +29,20 @@ class EventTracker(Task):
         ``token`` is (optionally) your Mixpanel api token. Not required if
         you've already configured your MIXPANEL_API_TOKEN setting.
         """
+        logger = self.get_logger(**kwargs)
+        logger.info("Recording event: <%s>" % event_name)
         properties = self._handle_properties(properties, token)
 
         url_params = self._build_params(event_name, properties)
         conn = self._get_connection()
 
-        return self._send_request(conn, url_params)
+        result = self._send_request(conn, url_params)
+        if result:
+            logger.info("Event recorded/logged: <%s>" % event_name)
+        else:
+            logger.info("Event ignored: <%s>" % event_name)
+
+        return result
 
     def _handle_properties(self, properties, token):
         """
