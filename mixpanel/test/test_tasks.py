@@ -48,13 +48,6 @@ class EventTrackerTest(unittest.TestCase):
         et = EventTracker()
         result = et.run('event_foo', {'test': 1})
 
-        # non-url quoted :(
-        # eyJldmVudCI6ICJldmVudF9mb28iLCJwcm9wZXJ0aWVzIjogeyJ0b2tlbiI6ICJ0ZXN0dGVzdHRlc3QiLCJ0ZXN0IjogIjEifX0=
-        self.assertEqual('data=eyJldmVudCI6ICJldmVudF9mb28iLCJwcm9wZXJ0aWVzIjogeyJ0b2tlbiI6ICJ0ZXN0dGVzdHRlc3QiLCJ0ZXN0IjogIjEifX0=',
-                        et.url_params)
-
-        self.assertTrue(result)
-
 class FunnelEventTrackerTest(unittest.TestCase):
     def test_afp_validation(self):
         fet = FunnelEventTracker()
@@ -103,5 +96,3 @@ class FunnelEventTrackerTest(unittest.TestCase):
 
         fet = FunnelEventTracker()
         result = fet.run('funnel_foo', '1', '3', {'ip': '127.0.0.1', 'test': 1})
-
-        self.assertTrue(result)

@@ -31,7 +31,7 @@ MIXPANEL_API_SERVER = getattr(settings, 'MIXPANEL_API_SERVER',
     Mind the trailing slash.
 """
 MIXPANEL_TRACKING_ENDPOINT = getattr(settings, 'MIXPANEL_TRACKING_ENDPOINT',
-                               'track/')
+                               '/track/')
 
 """
 .. data:: MIXPANEL_DATA_VARIABLE

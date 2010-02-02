@@ -14,6 +14,10 @@ class EventTracker(Task):
     Task to track a Mixpanel event.
     """
 
+    class FailedEventRequest(Exception):
+        """The attempted recording event failed because of a non-200 HTTP return code"""
+        pass
+
     def run(self, event_name, properties=None, token=None):
         """
         Track an event occurrence to mixpanel through the API.
@@ -38,7 +42,7 @@ class EventTracker(Task):
         """
         if properties == None:
             properties = {}
-        if token == None:
+        if token == None and token not in properties:
             token = mp_settings.MIXPANEL_API_TOKEN
 
         if token not in properties:
@@ -61,8 +65,6 @@ class EventTracker(Task):
         data_var = mp_settings.MIXPANEL_DATA_VARIABLE
         url_params = urllib.urlencode({data_var: data})
 
-        self.url_params = url_params
-
         return url_params
 
     def _send_request(self, connection, params):
@@ -76,7 +78,7 @@ class EventTracker(Task):
 
         response = connection.getresponse()
         if response.status != 200:
-            return False
+            raise EventTracker.FailedEventRequest("The tracking request failed. Non-200 response code was: %s" % response.status)
 
         # Successful requests will generate a log
         response_data = response.read()
