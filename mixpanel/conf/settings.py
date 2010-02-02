@@ -26,9 +26,9 @@ MIXPANEL_API_SERVER = getattr(settings, 'MIXPANEL_API_SERVER',
 """
 .. data:: MIXPANEL_TRACKING_ENDPOINT
 
-    URL endpoint for registering events. defaults to ``track/``
+    URL endpoint for registering events. defaults to ``/track/``
 
-    Mind the trailing slash.
+    Mind the slashes.
 """
 MIXPANEL_TRACKING_ENDPOINT = getattr(settings, 'MIXPANEL_TRACKING_ENDPOINT',
                                '/track/')
