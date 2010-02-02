@@ -85,14 +85,14 @@ class EventTracker(Task):
         """
         Send a an event with its properties to the api server.
 
-        Returns ``true`` if the response had a 200 status.
+        Returns ``true`` if the event was logged by Mixpanel.
         """
         endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
         connection.request('GET', '%s?%s' % (endpoint, params))
 
         response = connection.getresponse()
-        if response.status != 200:
-            raise EventTracker.FailedEventRequest("The tracking request failed. Non-200 response code was: %s" % response.status)
+        if response.status != 200 or response.reason != 'OK':
+            raise EventTracker.FailedEventRequest("The tracking request failed. Non-200 response code was: %s %s" % (response.status, response.reason))
 
         # Successful requests will generate a log
         response_data = response.read()
@@ -112,7 +112,7 @@ class FunnelEventTracker(EventTracker):
         """Required properties were missing from the funnel-tracking call"""
         pass
 
-    def run(self, funnel, step, goal, properties, token=None):
+    def run(self, funnel, step, goal, properties, token=None, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
