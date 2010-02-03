@@ -12,6 +12,7 @@ class EventTrackerTest(unittest.TestCase):
         mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
         mp_settings.MIXPANEL_API_SERVER = 'api.mixpanel.com'
         mp_settings.MIXPANEL_TRACKING_ENDPOINT = '/track/'
+        mp_settings.MIXPANEL_TEST_ONLY = True
 
     def test_handle_properties_w_token(self):
         et = EventTracker()
@@ -52,14 +53,14 @@ class EventTrackerTest(unittest.TestCase):
         et = EventTracker()
         self.assertRaises(EventTracker.FailedEventRequest,
                           et.run,
-                          'event_foo', {'test': 1})
+                          'event_foo', {})
 
     def test_run(self):
         # "correct" result obtained from: http://mixpanel.com/api/docs/console
         mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
 
         et = EventTracker()
-        result = et.run('event_foo', {'test': 1})
+        result = et.run('event_foo', {})
 
         self.assertTrue(result)
 
@@ -76,13 +77,17 @@ class EventTrackerTest(unittest.TestCase):
 
     def test_debug_logger(self):
         et = EventTracker()
-        # Times older than 3 hours don't get recorded according to: http://mixpanel.com/api/docs/specification
-        # equests will be rejected that are 3 hours older than present time
-        result = et.run('event_foo', {'test': 1}, loglevel=logging.DEBUG)
+        result = et.run('event_foo', {}, loglevel=logging.DEBUG)
 
         self.assertTrue(result)
 
 class FunnelEventTrackerTest(unittest.TestCase):
+    def setUp(self):
+        mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
+        mp_settings.MIXPANEL_API_SERVER = 'api.mixpanel.com'
+        mp_settings.MIXPANEL_TRACKING_ENDPOINT = '/track/'
+        mp_settings.MIXPANEL_TEST_ONLY = True
+
     def test_afp_validation(self):
         fet = FunnelEventTracker()
 
@@ -129,6 +134,6 @@ class FunnelEventTrackerTest(unittest.TestCase):
         mp_settings.MIXPANEL_API_TOKEN = getattr(mp_settings, 'MIXPANEL_API_TOKEN', 'TEST')
 
         fet = FunnelEventTracker()
-        result = fet.run('funnel_foo', '1', '3', {'ip': '127.0.0.1', 'test': 1})
+        result = fet.run('funnel_foo', '1', '3', {'ip': '127.0.0.1'})
 
         self.assertTrue(result)

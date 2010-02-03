@@ -51,3 +51,11 @@ MIXPANEL_DATA_VARIABLE = getattr(settings, 'MIXPANEL_DATA_VARIABLE',
 """
 MIXPANEL_FUNNEL_EVENT_ID = getattr(settings, 'MIXPANEL_FUNNEL_EVENT_ID',
                                'mp_funnel')
+
+"""
+.. data:: MIXPANEL_TEST_ONLY
+
+    If this value is True, then events will be sent to Mixpanel with the property
+    test = 1 so that no events will actually be logged.
+"""
+MIXPANEL_TEST_ONLY = getattr(settings, 'MIXPANEL_TEST_ONLY', False)

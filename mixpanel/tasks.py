@@ -62,6 +62,9 @@ class EventTracker(Task):
         if token not in properties:
             properties['token'] = token
 
+        if mp_settings.MIXPANEL_TEST_ONLY:
+            properties['test'] = 1
+
         return properties
 
     def _get_connection(self):
