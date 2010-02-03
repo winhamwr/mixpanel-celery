@@ -33,8 +33,7 @@ exclusion_opts = []
 for t in excluded_tests:
     exclusion_opts.append('--exclude %s' % t)
 
-opts = ['-v', '--with-id', '--with-doctest', '--with-django', '--with-xunit',
-        '--django-settings', 'testproj.settings']
+opts = ['-v', '--with-id', '--with-doctest', '--with-xunit']
 
 nose_cmd = ['nosetests']
 
