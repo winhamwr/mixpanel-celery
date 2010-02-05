@@ -34,16 +34,32 @@ class EventTrackerTest(unittest.TestCase):
         properties = et._handle_properties(None, None)
         self.assertEqual('bar', properties['token'])
 
+    def test_is_test(self):
+        et = EventTracker()
+
+        self.assertEqual(et._is_test(None), 1)
+        self.assertEqual(et._is_test(False), 0)
+        self.assertEqual(et._is_test(True), 1)
+
+        mp_settings.MIXPANEL_TEST_ONLY = False
+        self.assertEqual(et._is_test(None), 0)
+        self.assertEqual(et._is_test(False), 0)
+        self.assertEqual(et._is_test(True), 1)
+
     def test_build_params(self):
         et = EventTracker()
 
         event = 'foo_event'
+        is_test = 1
         properties = {'token': 'testtoken'}
         params = {'event': event, 'properties': properties}
 
-        url_params = et._build_params(event, properties)
+        url_params = et._build_params(event, properties, is_test)
 
-        expected_params = urllib.urlencode({'data':base64.b64encode(simplejson.dumps(params))})
+        expected_params = urllib.urlencode({
+            'data':base64.b64encode(simplejson.dumps(params)),
+            'test':is_test,
+        })
 
         self.assertEqual(expected_params, url_params)
 
@@ -57,8 +73,6 @@ class EventTrackerTest(unittest.TestCase):
 
     def test_run(self):
         # "correct" result obtained from: http://mixpanel.com/api/docs/console
-        mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
-
         et = EventTracker()
         result = et.run('event_foo', {})
 
@@ -66,8 +80,6 @@ class EventTrackerTest(unittest.TestCase):
 
     def test_old_run(self):
         """non-recorded events should return False"""
-        mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
-
         et = EventTracker()
         # Times older than 3 hours don't get recorded according to: http://mixpanel.com/api/docs/specification
         # equests will be rejected that are 3 hours older than present time
@@ -107,7 +119,9 @@ class FunnelEventTrackerTest(unittest.TestCase):
 
         # only ip
         properties = {'ip': 'some_ip'}
-        fp = fet._add_funnel_properties(properties, funnel, step, goal)
+        self.assertRaises(FunnelEventTracker.InvalidFunnelProperties,
+                          fet._add_funnel_properties,
+                          properties, funnel, step, goal)
 
         # both
         properties = {'distinct_id': 'test_distinct_id',
@@ -131,9 +145,11 @@ class FunnelEventTrackerTest(unittest.TestCase):
         self.assertEqual(funnel_properties['goal'], goal)
 
     def test_run(self):
-        mp_settings.MIXPANEL_API_TOKEN = getattr(mp_settings, 'MIXPANEL_API_TOKEN', 'TEST')
+        funnel = 'test_funnel'
+        step = 'test_step'
+        goal = 'test_goal'
 
         fet = FunnelEventTracker()
-        result = fet.run('funnel_foo', '1', '3', {'ip': '127.0.0.1'})
+        result = fet.run(funnel, step, goal, {'distinct_id': 'test_user'})
 
         self.assertTrue(result)

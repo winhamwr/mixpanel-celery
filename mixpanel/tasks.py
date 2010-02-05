@@ -19,7 +19,7 @@ class EventTracker(Task):
         """The attempted recording event failed because of a non-200 HTTP return code"""
         pass
 
-    def run(self, event_name, properties=None, token=None, **kwargs):
+    def run(self, event_name, properties=None, token=None, test=None, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -29,15 +29,19 @@ class EventTracker(Task):
         describing the event.
         ``token`` is (optionally) your Mixpanel api token. Not required if
         you've already configured your MIXPANEL_API_TOKEN setting.
+        ``test`` is an optional override to your
+        `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for determining
+        if the event requests should actually be stored on the Mixpanel servers.
         """
         logger = self.get_logger(**kwargs)
         logger.info("Recording event: <%s>" % event_name)
         if logger.getEffectiveLevel() == logging.DEBUG:
             httplib.HTTPConnection.debuglevel = 1
 
+        is_test = self._is_test(test)
         properties = self._handle_properties(properties, token)
 
-        url_params = self._build_params(event_name, properties)
+        url_params = self._build_params(event_name, properties, is_test)
         logger.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
 
@@ -49,6 +53,22 @@ class EventTracker(Task):
             logger.info("Event ignored: <%s>" % event_name)
 
         return result
+
+    def _is_test(self, test):
+        """
+        Determine whether this event should be logged as a test request, meaning
+        it won't actually be stored on the Mixpanel servers. A return result of
+        1 means this will be a test, 0 means it won't as per the API spec.
+
+        Uses ``:mod:mixpanel.conf.settings.MIXPANEL_TEST_ONLY`` as the default
+        if no explicit test option is given.
+        """
+        if test == None:
+            test = mp_settings.MIXPANEL_TEST_ONLY
+
+        if test:
+            return 1
+        return 0
 
     def _handle_properties(self, properties, token):
         """
@@ -62,9 +82,6 @@ class EventTracker(Task):
         if token not in properties:
             properties['token'] = token
 
-        if mp_settings.MIXPANEL_TEST_ONLY:
-            properties['test'] = 1
-
         return properties
 
     def _get_connection(self):
@@ -72,7 +89,7 @@ class EventTracker(Task):
 
         return httplib.HTTPConnection(server)
 
-    def _build_params(self, event, properties):
+    def _build_params(self, event, properties, is_test):
         """
         Build HTTP params to record the given event and properties.
         """
@@ -80,7 +97,7 @@ class EventTracker(Task):
         data = base64.b64encode(simplejson.dumps(params))
 
         data_var = mp_settings.MIXPANEL_DATA_VARIABLE
-        url_params = urllib.urlencode({data_var: data})
+        url_params = urllib.urlencode({data_var: data, 'test': is_test})
 
         return url_params
 
@@ -115,7 +132,7 @@ class FunnelEventTracker(EventTracker):
         """Required properties were missing from the funnel-tracking call"""
         pass
 
-    def run(self, funnel, step, goal, properties, token=None, **kwargs):
+    def run(self, funnel, step, goal, properties, token=None, test=None, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -123,23 +140,28 @@ class FunnelEventTracker(EventTracker):
         this event under
         ``step`` the step in the funnel you're registering
         ``goal`` the end goal of this funnel
-        ``properties`` is (optionally) a dictionary of key/value pairs
-        describing the funnel event.
+        ``properties`` is a dictionary of key/value pairs
+        describing the funnel event. A ``distinct_id`` is required.
         ``token`` is (optionally) your Mixpanel api token. Not required if
         you've already configured your MIXPANEL_API_TOKEN setting.
+        ``test`` is an optional override to your
+        `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for determining
+        if the event requests should actually be stored on the Mixpanel servers.
         """
         properties = self._handle_properties(properties, token)
 
+        is_test = self._is_test(test)
         properties = self._add_funnel_properties(properties, funnel, step, goal)
 
-        url_params = self._build_params(mp_settings.MIXPANEL_FUNNEL_EVENT_ID, properties)
+        url_params = self._build_params(mp_settings.MIXPANEL_FUNNEL_EVENT_ID,
+                                        properties, is_test)
         conn = self._get_connection()
 
         return self._send_request(conn, url_params)
 
     def _add_funnel_properties(self, properties, funnel, step, goal):
-        if not properties.has_key('distinct_id') and not properties.has_key('ip'):
-            error_msg = "Either a ``distinct_id`` or ``ip`` property must be given to record a funnel event"
+        if not properties.has_key('distinct_id'):
+            error_msg = "A ``distinct_id`` must be given to record a funnel event"
             raise FunnelEventTracker.InvalidFunnelProperties(error_msg)
         properties['funnel'] = funnel
         properties['step'] = step
