@@ -33,24 +33,24 @@ class EventTracker(Task):
         `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for determining
         if the event requests should actually be stored on the Mixpanel servers.
         """
-        logger = self.get_logger(**kwargs)
-        logger.info("Recording event: <%s>" % event_name)
-        if logger.getEffectiveLevel() == logging.DEBUG:
+        self.l = self.get_logger(**kwargs)
+        self.l.info("Recording event: <%s>" % event_name)
+        if self.l.getEffectiveLevel() == logging.DEBUG:
             httplib.HTTPConnection.debuglevel = 1
 
         is_test = self._is_test(test)
         properties = self._handle_properties(properties, token)
 
         url_params = self._build_params(event_name, properties, is_test)
-        logger.debug("url_params: <%s>" % url_params)
+        self.l.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
 
         result = self._send_request(conn, url_params)
         conn.close()
         if result:
-            logger.info("Event recorded/logged: <%s>" % event_name)
+            self.l.info("Event recorded/logged: <%s>" % event_name)
         else:
-            logger.info("Event ignored: <%s>" % event_name)
+            self.l.info("Event ignored: <%s>" % event_name)
 
         return result
 
@@ -81,6 +81,8 @@ class EventTracker(Task):
 
         if token not in properties:
             properties['token'] = token
+
+        self.l.debug('pre-encoded properties: <%s>' % repr(properties))
 
         return properties
 
