@@ -9,3 +9,4 @@
     :maxdepth: 2
 
     mixpanel.tasks
+    mixpanel.conf.settings
