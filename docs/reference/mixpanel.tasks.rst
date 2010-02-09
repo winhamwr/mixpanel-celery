@@ -1,6 +1,6 @@
-================================
-Tasks: mixpanel - mixpanel.tasks
-================================
+==============================================
+Event Tracker Tasks: mixpanel - mixpanel.tasks
+==============================================
 
 .. currentmodule:: mixpanel.tasks
 

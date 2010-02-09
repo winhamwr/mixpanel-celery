@@ -1,6 +1,6 @@
-===============================
-Tasks: mixpanel - mixpanel.conf
-===============================
+===========================================
+Mixpanel Settings: mixpanel - mixpanel.conf
+===========================================
 
 .. currentmodule:: mixpanel.conf
 

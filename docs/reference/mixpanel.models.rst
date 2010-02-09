@@ -1,6 +1,6 @@
-=================================
-Tasks: mixpanel - mixpanel.models
-=================================
+===============================================
+Empty Django Models: mixpanel - mixpanel.models
+===============================================
 
 .. currentmodule:: mixpanel.models
 
