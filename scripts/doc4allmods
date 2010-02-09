@@ -4,7 +4,7 @@
 # Written by Ask Solem Hoel <askh@opera.com>
 
 PACKAGE="$1"
-SKIP_PACKAGES="$PACKAGE tests"
+SKIP_PACKAGES="$PACKAGE test"
 SKIP_FILES=""
 
 modules=$(find "$PACKAGE" -name "*.py")

@@ -11,4 +11,4 @@ ghdocs:
 	scripts/doc2ghpages
 
 autodoc:
-	contrib/doc4allmods celery
+	scripts/doc4allmods mixpanel
