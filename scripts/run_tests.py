@@ -4,9 +4,7 @@ import sys, os, subprocess
 
 scripts_dir = os.path.dirname(__file__)
 mixpanel_dir = os.path.join(scripts_dir, '..', 'mixpanel')
-testproj_dir = os.path.join(scripts_dir, '..', 'testproj')
 sys.path.append(mixpanel_dir)
-os.chdir(testproj_dir)
 
 try:
     import nose

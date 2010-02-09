@@ -14,6 +14,11 @@ class EventTracker(Task):
     """
     Task to track a Mixpanel event.
     """
+    def __init__(self, *args, **kwargs):
+        self.l = self.get_logger(**kwargs)
+
+        return super(EventTracker, self).__init__(*args, **kwargs)
+
 
     class FailedEventRequest(Exception):
         """The attempted recording event failed because of a non-200 HTTP return code"""
