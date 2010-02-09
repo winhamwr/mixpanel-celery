@@ -2,7 +2,7 @@
  mixpanel-celery - Asynchronous event tracking for Mixpanel
 ===========================================================
 
-:Version: 0.1.0
+:Version: |release|
 
 Introduction
 ============
@@ -30,33 +30,33 @@ Configuration
 For easy test usage with Django, set your Mixpanel api token in your project's
 ``settings.py`` file with the ``MIXPANEL_API_TOKEN`` variable. Then set::
 
-    ``CELERY_ALWAYS_EAGER`` = True
+    CELERY_ALWAYS_EAGER = True
 
 So that all of your `Celery`_ tasks will run in-line for now.
 
 Then add ``mixpanel`` to your list of ``INSTALLED_APPS``.
 
-Note: Obviously you'll want to actually configure ``Celery`` using one of the
-many available backends for actual production use and ``Celery`` has great
+Note: Obviously you'll want to actually configure `Celery`_ using one of the
+many available backends for actual production use and `Celery`_ has great
 documentation on that.
 
 Usage
 =====
 
-Basic python example tracking an event called 'my_event'::
+Basic python example tracking an event called ``my_event``
 
-.. code-block: python
+.. code-block:: python
 
     from mixpanel.tasks import track_event
 
     track_event('my_event', {'user_id': 1}, token='YOUR_API_TOKEN')
 
 
-Example usage in a Django view::
+Example usage in a Django view
 
 .. code-block:: python
 
-    from mixpanel.tasks import track_event
+    from mixpanel.tasks import tck_event
     from django.shortcuts import render_to_response
 
     def test_view(request, template='test/test_view.html'):
