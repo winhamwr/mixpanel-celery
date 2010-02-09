@@ -15,6 +15,12 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath('../mixpanel'))
+sys.path.append(os.path.abspath('../testproj'))
+
+# Setup the testproj so that autodoc works
+import testproj.settings as settings
+from django.core.management import setup_environ
+setup_environ(settings)
 
 import mixpanel
 
