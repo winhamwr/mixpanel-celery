@@ -19,7 +19,9 @@ Installation
 ============
 
 The easiest way to install the current development version of mixpanel-celery is
-via ``pip``::
+via `pip`_
+
+.. code-block:: bash
 
     $ pip install -e git+git://github.com/winhamwr/mixpanel-celery.git
 
@@ -47,26 +49,25 @@ Basic python example tracking an event called ``my_event``
 
 .. code-block:: python
 
-    from mixpanel.tasks import track_event
+    from mixpanel.tasks import EventTracker
 
-    track_event('my_event', {'user_id': 1}, token='YOUR_API_TOKEN')
+    et = EventTracker()
+    et.run('my_event', {'distinct_id': 1}, token='YOUR_API_TOKEN')
 
 
 Example usage in a Django view
 
 .. code-block:: python
 
-    from mixpanel.tasks import tck_event
+    from mixpanel.tasks import track_event
     from django.shortcuts import render_to_response
 
     def test_view(request, template='test/test_view.html'):
         """
-        Show a user a test page. Records
+        Show user a test page.
         """
-        user = request.user
-
         # We should record that the user hit this page
-        track_event('hit_test_view', {'user_id': user.pk})
+        track_event('hit_test_view', {'distinct_id': request.user.pk})
 
         context = RequestContext(request, {})
         return render_to_response(template, context_instance=context)
@@ -95,3 +96,4 @@ This project uses `Semantic Versioning`_.
 .. _`sphinx`: http://sphinx.pocoo.org/
 .. _`online mixpanel-celery documentation`: http://winhamwr.github.com/mixpanel-celery/
 .. _`Semantic Versioning`: http://semver.org/
+.. _`pip`: http://pypi.python.org/pypi/pip
