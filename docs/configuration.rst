@@ -25,4 +25,4 @@ Configuration Options
 
 .. _`Mixpanel`: http://mixpanel.com/
 .. _`Celery`: http://ask.github.com/celery/
-.. _`Celery`: http://ask.github.com/celery/configuration.html
+.. _`Celery Configuration Docs`: http://ask.github.com/celery/configuration.html
