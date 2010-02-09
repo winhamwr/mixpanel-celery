@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tasks: mixpanel - mixpanel.tasks &mdash; mixpanel-celery v0.3.0.dev documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3.0.dev',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="mixpanel-celery v0.3.0.dev documentation" href="../index.html" />
+    <link rel="up" title="Module API Reference" href="index.html" />
+    <link rel="next" title="Tasks: mixpanel - mixpanel.conf.settings" href="mixpanel.conf.settings.html" />
+    <link rel="prev" title="Module API Reference" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
+        <li class="right" >
+          <a href="mixpanel.conf.settings.html" title="Tasks: mixpanel - mixpanel.conf.settings"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Module API Reference"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">mixpanel-celery v0.3.0.dev documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module API Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-mixpanel.tasks">
+<h1>Tasks: mixpanel - mixpanel.tasks<a class="headerlink" href="#module-mixpanel.tasks" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="mixpanel.tasks.EventTracker">
+<em class="property">class </em><tt class="descclassname">mixpanel.tasks.</tt><tt class="descname">EventTracker</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mixpanel.tasks.EventTracker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task to track a Mixpanel event.</p>
+<dl class="exception">
+<dt id="mixpanel.tasks.EventTracker.FailedEventRequest">
+<em class="property">exception </em><tt class="descname">FailedEventRequest</tt><a class="headerlink" href="#mixpanel.tasks.EventTracker.FailedEventRequest" title="Permalink to this definition">¶</a></dt>
+<dd>The attempted recording event failed because of a non-200 HTTP return code</dd></dl>
+
+<dl class="method">
+<dt id="mixpanel.tasks.EventTracker.run">
+<tt class="descclassname">EventTracker.</tt><tt class="descname">run</tt><big>(</big><em>event_name</em>, <em>properties=None</em>, <em>token=None</em>, <em>test=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mixpanel.tasks.EventTracker.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Track an event occurrence to mixpanel through the API.</p>
+<p><tt class="docutils literal"><span class="pre">event_name</span></tt> is the string for the event/category you&#8217;d like to log
+this event under
+<tt class="docutils literal"><span class="pre">properties</span></tt> is (optionally) a dictionary of key/value pairs
+describing the event.
+<tt class="docutils literal"><span class="pre">token</span></tt> is (optionally) your Mixpanel api token. Not required if
+you&#8217;ve already configured your MIXPANEL_API_TOKEN setting.
+<tt class="docutils literal"><span class="pre">test</span></tt> is an optional override to your
+<cite>:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY</cite> setting for determining
+if the event requests should actually be stored on the Mixpanel servers.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mixpanel.tasks.FunnelEventTracker">
+<em class="property">class </em><tt class="descclassname">mixpanel.tasks.</tt><tt class="descname">FunnelEventTracker</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mixpanel.tasks.FunnelEventTracker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task to track a Mixpanel funnel event.</p>
+<dl class="exception">
+<dt id="mixpanel.tasks.FunnelEventTracker.InvalidFunnelProperties">
+<em class="property">exception </em><tt class="descname">InvalidFunnelProperties</tt><a class="headerlink" href="#mixpanel.tasks.FunnelEventTracker.InvalidFunnelProperties" title="Permalink to this definition">¶</a></dt>
+<dd>Required properties were missing from the funnel-tracking call</dd></dl>
+
+<dl class="method">
+<dt id="mixpanel.tasks.FunnelEventTracker.run">
+<tt class="descclassname">FunnelEventTracker.</tt><tt class="descname">run</tt><big>(</big><em>funnel</em>, <em>step</em>, <em>goal</em>, <em>properties</em>, <em>token=None</em>, <em>test=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mixpanel.tasks.FunnelEventTracker.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Track an event occurrence to mixpanel through the API.</p>
+<p><tt class="docutils literal"><span class="pre">funnel</span></tt> is the string for the funnel you&#8217;d like to log
+this event under
+<tt class="docutils literal"><span class="pre">step</span></tt> the step in the funnel you&#8217;re registering
+<tt class="docutils literal"><span class="pre">goal</span></tt> the end goal of this funnel
+<tt class="docutils literal"><span class="pre">properties</span></tt> is a dictionary of key/value pairs
+describing the funnel event. A <tt class="docutils literal"><span class="pre">distinct_id</span></tt> is required.
+<tt class="docutils literal"><span class="pre">token</span></tt> is (optionally) your Mixpanel api token. Not required if
+you&#8217;ve already configured your MIXPANEL_API_TOKEN setting.
+<tt class="docutils literal"><span class="pre">test</span></tt> is an optional override to your
+<cite>:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY</cite> setting for determining
+if the event requests should actually be stored on the Mixpanel servers.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="index.html"
+                                  title="previous chapter">Module API Reference</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="mixpanel.conf.settings.html"
+                                  title="next chapter">Tasks: mixpanel - mixpanel.conf.settings</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="../_sources/reference/mixpanel.tasks.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../modindex.html" title="Global Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mixpanel.conf.settings.html" title="Tasks: mixpanel - mixpanel.conf.settings"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Module API Reference"
+             >previous</a> |</li>
+        <li><a href="../index.html">mixpanel-celery v0.3.0.dev documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module API Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, Wes Winham.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.3.
+    </div>
+  </body>
+</html>

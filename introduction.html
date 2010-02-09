@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mixpanel-celery - Asynchronous event tracking for Mixpanel &mdash; mixpanel-celery v0.3.0.dev documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.3.0.dev',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mixpanel-celery v0.3.0.dev documentation" href="index.html" />
+    <link rel="next" title="Configuring mixpanel-celery" href="configuration.html" />
+    <link rel="prev" title="Welcome to mixpanel-celery’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuring mixpanel-celery"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to mixpanel-celery’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mixpanel-celery v0.3.0.dev documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mixpanel-celery-asynchronous-event-tracking-for-mixpanel">
+<h1>mixpanel-celery - Asynchronous event tracking for Mixpanel<a class="headerlink" href="#mixpanel-celery-asynchronous-event-tracking-for-mixpanel" title="Permalink to this headline">¶</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Version:</th><td class="field-body">0.3.0.dev</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>mixpanel-celery helps you use <a class="reference external" href="http://ask.github.com/celery/">Celery</a> to asynchronously track your <a class="reference external" href="http://mixpanel.com/">Mixpanel</a>
+events. You want to perform your tracking asynchronously, because waiting for HTTP
+requests to Mixpanel to complete every time you want to record something important
+isn&#8217;t ideal when you&#8217;ve already worked so hard to tune your performance.</p>
+<p>mixpanel-celery works great with Django, but because Celery works with just
+python, so does mixpanel-celery.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>The easiest way to install the current development version of mixpanel-celery is
+via <tt class="docutils literal"><span class="pre">pip</span></tt>:</p>
+<div class="highlight-python"><pre>$ pip install -e git+git://github.com/winhamwr/mixpanel-celery.git</pre>
+</div>
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>For easy test usage with Django, set your Mixpanel api token in your project&#8217;s
+<tt class="docutils literal"><span class="pre">settings.py</span></tt> file with the <tt class="docutils literal"><span class="pre">MIXPANEL_API_TOKEN</span></tt> variable. Then set:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">CELERY_ALWAYS_EAGER</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>So that all of your <a class="reference external" href="http://ask.github.com/celery/">Celery</a> tasks will run in-line for now.</p>
+<p>Then add <tt class="docutils literal"><span class="pre">mixpanel</span></tt> to your list of <tt class="docutils literal"><span class="pre">INSTALLED_APPS</span></tt>.</p>
+<p>Note: Obviously you&#8217;ll want to actually configure <a class="reference external" href="http://ask.github.com/celery/">Celery</a> using one of the
+many available backends for actual production use and <a class="reference external" href="http://ask.github.com/celery/">Celery</a> has great
+documentation on that.</p>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>Basic python example tracking an event called <tt class="docutils literal"><span class="pre">my_event</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mixpanel.tasks</span> <span class="kn">import</span> <span class="n">track_event</span>
+
+<span class="n">track_event</span><span class="p">(</span><span class="s">&#39;my_event&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;user_id&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="n">token</span><span class="o">=</span><span class="s">&#39;YOUR_API_TOKEN&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Example usage in a Django view</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mixpanel.tasks</span> <span class="kn">import</span> <span class="n">tck_event</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span>
+
+<span class="k">def</span> <span class="nf">test_view</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s">&#39;test/test_view.html&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Show a user a test page. Records</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+
+    <span class="c"># We should record that the user hit this page</span>
+    <span class="n">track_event</span><span class="p">(</span><span class="s">&#39;hit_test_view&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;user_id&#39;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">pk</span><span class="p">})</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">context_instance</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="bug-tracker">
+<h2>Bug Tracker<a class="headerlink" href="#bug-tracker" title="Permalink to this headline">¶</a></h2>
+<p>If you have feedback about bugs, features or anything else, the github issue
+tracking is a great place to report them:
+<a class="reference external" href="http://github.com/winhamwr/mixpanel-celery/issues">http://github.com/winhamwr/mixpanel-celery/issues</a></p>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>This software is licensed under the <tt class="docutils literal"><span class="pre">New</span> <span class="pre">BSD</span> <span class="pre">License</span></tt>. See the <tt class="docutils literal"><span class="pre">LICENSE</span></tt>
+file in the top distribution directory for the full license text.</p>
+</div>
+<div class="section" id="versioning">
+<h2>Versioning<a class="headerlink" href="#versioning" title="Permalink to this headline">¶</a></h2>
+<p>This project uses <a class="reference external" href="http://semver.org/">Semantic Versioning</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="">mixpanel-celery - Asynchronous event tracking for Mixpanel</a><ul>
+<li><a class="reference external" href="#introduction">Introduction</a></li>
+<li><a class="reference external" href="#installation">Installation</a></li>
+<li><a class="reference external" href="#configuration">Configuration</a></li>
+<li><a class="reference external" href="#usage">Usage</a></li>
+<li><a class="reference external" href="#bug-tracker">Bug Tracker</a></li>
+<li><a class="reference external" href="#license">License</a></li>
+<li><a class="reference external" href="#versioning">Versioning</a></li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="index.html"
+                                  title="previous chapter">Welcome to mixpanel-celery&#8217;s documentation!</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="configuration.html"
+                                  title="next chapter">Configuring mixpanel-celery</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/introduction.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuring mixpanel-celery"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to mixpanel-celery’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">mixpanel-celery v0.3.0.dev documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, Wes Winham.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.3.
+    </div>
+  </body>
+</html>
