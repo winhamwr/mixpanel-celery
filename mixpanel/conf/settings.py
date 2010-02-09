@@ -13,7 +13,7 @@ from django.conf import settings
 
     .. _`mixpanel account page`: http://mixpanel.com/user/account/
 """
-MIXPANEL_API_TOKEN = getattr(settings, 'MIXPANEL_API_TOKEN')
+MIXPANEL_API_TOKEN = getattr(settings, 'MIXPANEL_API_TOKEN', None)
 
 """
 .. data:: MIXPANEL_API_SERVER
