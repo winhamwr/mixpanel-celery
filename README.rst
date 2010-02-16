@@ -16,6 +16,9 @@ python, so does mixpanel-celery.
 For full documenation, you can build the `sphinx`_ documentation yourself or
 vist the `online mixpanel-celery documentation`_
 
+This project isn't affiliated with the `Mixpanel`_ company. Just a customer's
+implementation of a client for their service.
+
 .. _`Celery`: http://ask.github.com/celery/
 .. _`Mixpanel`: http://mixpanel.com/
 .. _`sphinx`: http://sphinx.pocoo.org/
