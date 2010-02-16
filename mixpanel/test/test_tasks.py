@@ -4,6 +4,8 @@ import simplejson
 import urllib
 import logging
 
+from celery.exceptions import RetryTaskError
+
 from mixpanel.tasks import EventTracker, FunnelEventTracker
 from mixpanel.conf import settings as mp_settings
 
@@ -67,7 +69,7 @@ class EventTrackerTest(unittest.TestCase):
         mp_settings.MIXPANEL_TRACKING_ENDPOINT = 'brokenurl'
 
         et = EventTracker()
-        self.assertRaises(EventTracker.FailedEventRequest,
+        self.assertRaises(RetryTaskError,
                           et.run,
                           'event_foo', {})
 
