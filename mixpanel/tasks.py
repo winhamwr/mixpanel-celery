@@ -14,11 +14,7 @@ class EventTracker(Task):
     """
     Task to track a Mixpanel event.
     """
-    def __init__(self, *args, **kwargs):
-        self.l = self.get_logger(**kwargs)
-
-        return super(EventTracker, self).__init__(*args, **kwargs)
-
+    name = "mixpanel.tasks.EventTracker"
 
     class FailedEventRequest(Exception):
         """The attempted recording event failed because of a non-200 HTTP return code"""
@@ -38,22 +34,23 @@ class EventTracker(Task):
         `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for determining
         if the event requests should actually be stored on the Mixpanel servers.
         """
-        self.l = self.get_logger(**kwargs)
-        self.l.info("Recording event: <%s>" % event_name)
-        if self.l.getEffectiveLevel() == logging.DEBUG:
+        l = self.get_logger(**kwargs)
+        l.info("Recording event: <%s>" % event_name)
+        if l.getEffectiveLevel() == logging.DEBUG:
             httplib.HTTPConnection.debuglevel = 1
 
         is_test = self._is_test(test)
         generated_properties = self._handle_properties(properties, token)
 
         url_params = self._build_params(event_name, generated_properties, is_test)
-        self.l.debug("url_params: <%s>" % url_params)
+        l.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
 
         try:
             result = self._send_request(conn, url_params)
         except EventTracker.FailedEventRequest, exception:
-            self.l.info("Event failed. Retrying: <%s>" % event_name)
+            conn.close()
+            l.info("Event failed. Retrying: <%s>" % event_name)
             self.retry(args=[event_name],
                        kwargs={
                            'properties': properties,
@@ -62,11 +59,12 @@ class EventTracker(Task):
                         }, exc=exception,
                        countdown=mp_settings.MIXPANEL_RETRY_DELAY,
                        **kwargs)
+            return
         conn.close()
         if result:
-            self.l.info("Event recorded/logged: <%s>" % event_name)
+            l.info("Event recorded/logged: <%s>" % event_name)
         else:
-            self.l.info("Event ignored: <%s>" % event_name)
+            l.info("Event ignored: <%s>" % event_name)
 
         return result
 
@@ -98,7 +96,8 @@ class EventTracker(Task):
         if token not in properties:
             properties['token'] = token
 
-        self.l.debug('pre-encoded properties: <%s>' % repr(properties))
+        l = self.get_logger()
+        l.debug('pre-encoded properties: <%s>' % repr(properties))
 
         return properties
 
@@ -145,6 +144,7 @@ class FunnelEventTracker(EventTracker):
     """
     Task to track a Mixpanel funnel event.
     """
+    name = "mixpanel.tasks.FunnelEventTracker"
 
     class InvalidFunnelProperties(Exception):
         """Required properties were missing from the funnel-tracking call"""
