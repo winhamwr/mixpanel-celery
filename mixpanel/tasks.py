@@ -44,13 +44,24 @@ class EventTracker(Task):
             httplib.HTTPConnection.debuglevel = 1
 
         is_test = self._is_test(test)
-        properties = self._handle_properties(properties, token)
+        generated_properties = self._handle_properties(properties, token)
 
-        url_params = self._build_params(event_name, properties, is_test)
+        url_params = self._build_params(event_name, generated_properties, is_test)
         self.l.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
 
-        result = self._send_request(conn, url_params)
+        try:
+            result = self._send_request(conn, url_params)
+        except EventTracker.FailedEventRequest, exception:
+            self.l.info("Event failed. Retrying: <%s>" % event_name)
+            self.retry(args=[event_name],
+                       kwargs={
+                           'properties': properties,
+                           'token': token,
+                           'test': test
+                        }, exc=exception,
+                       countdown=mp_settings.MIXPANEL_RETRY_DELAY,
+                       **kwargs)
         conn.close()
         if result:
             self.l.info("Event recorded/logged: <%s>" % event_name)

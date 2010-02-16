@@ -16,6 +16,17 @@ from django.conf import settings
 MIXPANEL_API_TOKEN = getattr(settings, 'MIXPANEL_API_TOKEN', None)
 
 """
+.. data:: MIXPANEL_RETRY_DELAY
+
+    Number of seconds to wait before retrying an event-tracking request that
+    failed because of an invalid server response. These failed responses are
+    usually 502's or 504's because Mixpanel is under increased load.
+
+    Defaults to 5 minutes.
+"""
+MIXPANEL_RETRY_DELAY = getattr(settings, 'MIXPANEL_RETRY_DELAY', 60*5)
+
+"""
 .. data:: MIXPANEL_API_SERVER
 
     URL for the mixpanel api server. This probably shouldn't change.
