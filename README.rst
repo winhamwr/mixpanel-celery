@@ -6,9 +6,9 @@ Documentation
 =============
 
 mixpanel-celery helps you use `Celery`_ to asynchronously track your `Mixpanel`_
-events. You want to perform your tracking asynchronously, because waiting for HTTP
-requests to Mixpanel to complete every time you want to record something important
-isn't ideal when you've already worked so hard to tune your performance.
+events. Waiting on HTTP requests to Mixpanel's api to complete every time you
+want to record something slows you down. Using mixpanel-celery gives you all of
+the Mixpanel goodness without any of the potential performance impact.
 
 mixpanel-celery works great with Django, but because Celery works with just
 python, so does mixpanel-celery.
