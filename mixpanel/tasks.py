@@ -58,6 +58,7 @@ class EventTracker(Task):
                            'test': test
                         }, exc=exception,
                        countdown=mp_settings.MIXPANEL_RETRY_DELAY,
+                       throw=False,
                        **kwargs)
             return
         conn.close()
