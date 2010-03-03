@@ -71,7 +71,16 @@ class EventTrackerTest(unittest.TestCase):
         et = EventTracker()
         self.assertRaises(RetryTaskError,
                           et.run,
-                          'event_foo', {})
+                          'event_foo', throw_retry_error=True)
+
+    def test_failed_socket_request(self):
+        mp_settings.MIXPANEL_API_SERVER = '127.0.0.1:60000'
+
+        et = EventTracker()
+        self.assertRaises(RetryTaskError,
+                          et.run,
+                          'event_foo', throw_retry_error=True)
+
 
     def test_run(self):
         # "correct" result obtained from: http://mixpanel.com/api/docs/console

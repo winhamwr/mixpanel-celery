@@ -4,6 +4,7 @@ import base64
 import simplejson
 import urlparse
 import logging
+import socket
 
 from celery.task import Task
 from celery.registry import tasks, AlreadyRegistered
@@ -20,7 +21,8 @@ class EventTracker(Task):
         """The attempted recording event failed because of a non-200 HTTP return code"""
         pass
 
-    def run(self, event_name, properties=None, token=None, test=None, **kwargs):
+    def run(self, event_name, properties=None, token=None, test=None, throw_retry_error=False,
+            **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -58,7 +60,7 @@ class EventTracker(Task):
                            'test': test
                         }, exc=exception,
                        countdown=mp_settings.MIXPANEL_RETRY_DELAY,
-                       throw=False,
+                       throw=throw_retry_error,
                        **kwargs)
             return
         conn.close()
@@ -126,9 +128,13 @@ class EventTracker(Task):
         Returns ``true`` if the event was logged by Mixpanel.
         """
         endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
-        connection.request('GET', '%s?%s' % (endpoint, params))
+        try:
+            connection.request('GET', '%s?%s' % (endpoint, params))
 
-        response = connection.getresponse()
+            response = connection.getresponse()
+        except socket.error, (value, message):
+            raise EventTracker.FailedEventRequest("The tracking request failed with a socket error. Message: [%s]" % message)
+
         if response.status != 200 or response.reason != 'OK':
             raise EventTracker.FailedEventRequest("The tracking request failed. Non-200 response code was: %s %s" % (response.status, response.reason))
 
