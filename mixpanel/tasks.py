@@ -107,6 +107,8 @@ class EventTracker(Task):
     def _get_connection(self):
         server = mp_settings.MIXPANEL_API_SERVER
 
+        # Wish we could use python 2.6's httplib timeout support
+        socket.setdefaulttimeout(mp_settings.MIXPANEL_API_TIMEOUT)
         return httplib.HTTPConnection(server)
 
     def _build_params(self, event, properties, is_test):
@@ -132,7 +134,7 @@ class EventTracker(Task):
             connection.request('GET', '%s?%s' % (endpoint, params))
 
             response = connection.getresponse()
-        except socket.error, (value, message):
+        except socket.error, message:
             raise EventTracker.FailedEventRequest("The tracking request failed with a socket error. Message: [%s]" % message)
 
         if response.status != 200 or response.reason != 'OK':
@@ -193,7 +195,6 @@ class FunnelEventTracker(EventTracker):
         properties['goal'] = goal
 
         return properties
-
 
 try:
     tasks.register(FunnelEventTracker)
