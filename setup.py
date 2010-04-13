@@ -22,10 +22,10 @@ setup(
     packages=find_packages(),
     scripts=[],
     zip_safe=False,
-    install_requires=['celery==0.8.3'],
+    install_requires=['celery>=1.0.0'],
     cmdclass = {},
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Framework :: Django",
         "Programming Language :: Python",
         "Intended Audience :: Developers",
