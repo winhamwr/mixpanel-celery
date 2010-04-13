@@ -7,7 +7,7 @@ import logging
 import socket
 
 from celery.task import Task
-from celery.registry import tasks, AlreadyRegistered
+from celery.registry import tasks
 
 from mixpanel.conf import settings as mp_settings
 
@@ -196,7 +196,4 @@ class FunnelEventTracker(EventTracker):
 
         return properties
 
-try:
-    tasks.register(FunnelEventTracker)
-except AlreadyRegistered:
-    pass
+tasks.register(FunnelEventTracker)
