@@ -53,15 +53,15 @@ class EventTracker(Task):
         except EventTracker.FailedEventRequest, exception:
             conn.close()
             l.info("Event failed. Retrying: <%s>" % event_name)
+            kwargs.update({
+                'properties': properties,
+                'token': token,
+                'test': test})
             self.retry(args=[event_name],
-                       kwargs={
-                           'properties': properties,
-                           'token': token,
-                           'test': test
-                        }, exc=exception,
+                       kwargs=kwargs,
+                       exc=exception,
                        countdown=mp_settings.MIXPANEL_RETRY_DELAY,
-                       throw=throw_retry_error,
-                       **kwargs)
+                       throw=throw_retry_error)
             return
         conn.close()
         if result:
