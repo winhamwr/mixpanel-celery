@@ -21,8 +21,8 @@ class EventTracker(Task):
         """The attempted recording event failed because of a non-200 HTTP return code"""
         pass
 
-    def run(self, event_name, properties=None, token=None, test=None, throw_retry_error=False,
-            **kwargs):
+    def run(self, event_name, properties=None, token=None, test=None,
+            throw_retry_error=False, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -159,7 +159,8 @@ class FunnelEventTracker(EventTracker):
         """Required properties were missing from the funnel-tracking call"""
         pass
 
-    def run(self, funnel, step, goal, properties, token=None, test=None, **kwargs):
+    def run(self, funnel, step, goal, properties, token=None, test=None,
+            throw_retry_error=False, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -175,6 +176,8 @@ class FunnelEventTracker(EventTracker):
         `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for determining
         if the event requests should actually be stored on the Mixpanel servers.
         """
+        l = self.get_logger(**kwargs)
+        l.info("Recording funnel: <%s>-<%s>" % (funnel, step))
         properties = self._handle_properties(properties, token)
 
         is_test = self._is_test(test)
@@ -182,9 +185,30 @@ class FunnelEventTracker(EventTracker):
 
         url_params = self._build_params(mp_settings.MIXPANEL_FUNNEL_EVENT_ID,
                                         properties, is_test)
+        l.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
 
-        return self._send_request(conn, url_params)
+        try:
+            result = self._send_request(conn, url_params)
+        except EventTracker.FailedEventRequest, exception:
+            conn.close()
+            l.info("Funnel failed. Retrying: <%s>-<%s>" % (funnel, step))
+            kwargs.update({
+                'token': token,
+                'test': test})
+            self.retry(args=[funnel, step, goal, properties],
+                       kwargs=kwargs,
+                       exc=exception,
+                       countdown=mp_settings.MIXPANEL_RETRY_DELAY,
+                       throw=throw_retry_error)
+            return
+        conn.close()
+        if result:
+            l.info("Funnel recorded/logged: <%s>-<%s>" % (funnel, step))
+        else:
+            l.info("Funnel ignored: <%s>-<%s>" % (funnel, step))
+
+        return result
 
     def _add_funnel_properties(self, properties, funnel, step, goal):
         if not properties.has_key('distinct_id'):
