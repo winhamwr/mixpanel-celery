@@ -16,6 +16,7 @@ class EventTracker(Task):
     Task to track a Mixpanel event.
     """
     name = "mixpanel.tasks.EventTracker"
+    max_retries = mp_settings.MIXPANEL_MAX_RETRIES
 
     class FailedEventRequest(Exception):
         """The attempted recording event failed because of a non-200 HTTP return code"""
@@ -154,6 +155,7 @@ class FunnelEventTracker(EventTracker):
     Task to track a Mixpanel funnel event.
     """
     name = "mixpanel.tasks.FunnelEventTracker"
+    max_retries = mp_settings.MIXPANEL_MAX_RETRIES
 
     class InvalidFunnelProperties(Exception):
         """Required properties were missing from the funnel-tracking call"""

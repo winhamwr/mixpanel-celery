@@ -27,15 +27,24 @@ MIXPANEL_API_TOKEN = getattr(settings, 'MIXPANEL_API_TOKEN', None)
 MIXPANEL_RETRY_DELAY = getattr(settings, 'MIXPANEL_RETRY_DELAY', 60*5)
 
 """
+.. data:: MIXPANEL_MAX_RETRIES
+
+    Number of retry attempts to make before raising an exception.
+
+    Defaults to 5 attempts.
+"""
+MIXPANEL_MAX_RETRIES = getattr(settings, 'MIXPANEL_MAX_RETRIES', 5)
+
+"""
 .. data:: MIXPANEL_API_TIMEOUT
 
     Number of seconds to wait before timing out a request the mixpanel api
     server. The default 30-second timeout can cause your job queue to become
     swamped.
 
-    Defaults to 3 seconds.
+    Defaults to 5 seconds.
 """
-MIXPANEL_API_TIMEOUT = getattr(settings, 'MIXPANEL_API_TIMEOUT', 3)
+MIXPANEL_API_TIMEOUT = getattr(settings, 'MIXPANEL_API_TIMEOUT', 5)
 
 """
 .. data:: MIXPANEL_API_SERVER
