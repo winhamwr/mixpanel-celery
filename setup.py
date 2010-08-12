@@ -22,7 +22,7 @@ setup(
     packages=find_packages(),
     scripts=[],
     zip_safe=False,
-    install_requires=['celery>=1.0.0'],
+    install_requires=['celery=1.0.6'],
     cmdclass = {},
     classifiers=[
         "Development Status :: 4 - Beta",
