@@ -1,6 +1,6 @@
 """Asynchronous event tracking for Mixpanel"""
 
-VERSION = (0, 4, 1, '')
+VERSION = (0, 5, 0, '')
 
 __version__ = ".".join(map(str, VERSION[:-1]))
 __release__ = ".".join(map(str, VERSION))
