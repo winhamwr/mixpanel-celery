@@ -41,7 +41,7 @@ the test suite.
 
 It is also possible to run specific tests, disable coverage, use
 ``--multiprocess``, etc. by using the ``scripts/run_tests.py`` script. For
-example, to only run a  single test::
+example, to only run a  single test
 
 .. code-block:: bash
 
@@ -97,7 +97,7 @@ Example usage in a Django view
 Building the Documentation
 ==========================
 
-mixpanel-celery uses `sphinx`_ for documentation. To build the HTML docs::
+mixpanel-celery uses `sphinx`_ for documentation. To build the HTML docs
 
 .. code-block:: bash
 
