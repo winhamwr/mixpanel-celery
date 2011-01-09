@@ -26,6 +26,28 @@ via `pip`_
     $ pip install -e git+git://github.com/winhamwr/mixpanel-celery.git
 
 
+Running The Test Suite
+======================
+
+Setuptools' ``nosetests`` command is the easiest way to run the test suite.
+
+.. code-block:: bash
+
+    $ cd /path/to/mixpanel-celery
+    $ python setup.py nosetests
+
+Currently, two tests will fail unless you configure `RabbitMQ`_ specifically for
+the test suite.
+
+It is also possible to run specific tests, disable coverage, use
+``--multiprocess``, etc. by using the ``scripts/run_tests.py`` script. For
+example, to only run a  single test::
+
+.. code-block:: bash
+
+    $ cd /path/to/mixpanel-celery/scripts
+    $ ./run_tests.py mixpanel.test.test_tasks:EventTrackerTest.test_handle_properties_no_token
+
 Configuration
 =============
 
@@ -72,6 +94,17 @@ Example usage in a Django view
         context = RequestContext(request, {})
         return render_to_response(template, context_instance=context)
 
+Building the Documentation
+==========================
+
+mixpanel-celery uses `sphinx`_ for documentation. To build the HTML docs::
+
+.. code-block:: bash
+
+    $ pip install sphinx
+    $ pip install sphinxtogithub
+    $ cd /path/to/mixpanel-celery/docs
+    $ make html
 
 Bug Tracker
 ===========
@@ -97,3 +130,4 @@ This project uses `Semantic Versioning`_.
 .. _`online mixpanel-celery documentation`: http://winhamwr.github.com/mixpanel-celery/
 .. _`Semantic Versioning`: http://semver.org/
 .. _`pip`: http://pypi.python.org/pypi/pip
+.. _`RabbitMQ`: http://www.rabbitmq.com/
