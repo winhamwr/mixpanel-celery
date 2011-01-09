@@ -21,10 +21,20 @@ Installation
 The easiest way to install the current development version of mixpanel-celery is
 via `pip`_
 
+Installing The Stable Version
+-----------------------------
+
 .. code-block:: bash
 
-    $ pip install -e git+git://github.com/winhamwr/mixpanel-celery.git
+    $ pip install mixpanel-celery
 
+
+Installing The Development Version
+----------------------------------
+
+.. code-block:: bash
+
+    $ pip install -e git+git://github.com/winhamwr/mixpanel-celery.git#egg=mixpanel-celery
 
 Running The Test Suite
 ======================
