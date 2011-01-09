@@ -94,10 +94,10 @@ class EventTracker(Task):
         """
         if properties == None:
             properties = {}
-        if token == None and token not in properties:
-            token = mp_settings.MIXPANEL_API_TOKEN
 
-        if token not in properties:
+        if not properties.get('token', None):
+            if token is None:
+                token = mp_settings.MIXPANEL_API_TOKEN
             properties['token'] = token
 
         l = self.get_logger()

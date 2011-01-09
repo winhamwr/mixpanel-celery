@@ -36,6 +36,15 @@ class EventTrackerTest(unittest.TestCase):
         properties = et._handle_properties(None, None)
         self.assertEqual('bar', properties['token'])
 
+    def test_handle_properties_given(self):
+        et = EventTracker()
+
+        properties = et._handle_properties({'token': 'bar'}, None)
+        self.assertEqual('bar', properties['token'])
+
+        properties = et._handle_properties({'token': 'bar'}, 'foo')
+        self.assertEqual('bar', properties['token'])
+
     def test_is_test(self):
         et = EventTracker()
 
