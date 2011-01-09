@@ -1,10 +1,16 @@
 #! /usr/bin/env python
 
-import sys, os, subprocess
+import os
+import subprocess
+import sys
 
 scripts_dir = os.path.dirname(__file__)
-mixpanel_dir = os.path.join(scripts_dir, '..', 'mixpanel')
-sys.path.append(mixpanel_dir)
+# Add mixpanel to the python path in case we're trying to test before
+# installation and because we need to use ``testproj`` for testing
+root_dir = os.path.join(scripts_dir, '..')
+sys.path.append(root_dir)
+# Set DJANGO_SETTINGS_MODULE
+os.environ['DJANGO_SETTINGS_MODULE'] = 'testproj.settings'
 
 try:
     import nose
