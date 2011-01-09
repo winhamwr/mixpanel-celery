@@ -2,8 +2,11 @@ include AUTHORS
 include README.rst
 include MANIFEST.in
 include LICENSE
-recursive-include mixpanel *.py
+include Makefile
 recursive-include docs *
+recursive-include mixpanel *.py
+recursive-include scripts *
+recursive-include testproj *.py
 prune docs/*.pyc
 prune mixpanel/*.pyc
 prune docs/.build
