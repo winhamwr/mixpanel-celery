@@ -1,10 +1,11 @@
 import httplib
 import urllib
 import base64
-import simplejson
 import urlparse
 import logging
 import socket
+
+from django.utils import simplejson
 
 from celery.task import Task
 from celery.registry import tasks
