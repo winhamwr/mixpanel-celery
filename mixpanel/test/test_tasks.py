@@ -1,8 +1,9 @@
 import unittest
 import base64
-import simplejson
 import urllib
 import logging
+
+from django.utils import simplejson
 
 from celery.exceptions import RetryTaskError
 
