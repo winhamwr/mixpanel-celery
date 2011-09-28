@@ -1,6 +1,10 @@
 """Default configuration values and documentation"""
 
 from django.conf import settings
+import os
+
+if os.getenv('DJANGO_SETTINGS_MODULE', None) is None:
+    settings.configure()
 
 """
 .. data:: MIXPANEL_API_TOKEN
