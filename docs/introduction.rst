@@ -91,8 +91,11 @@ Example usage in a Django view
 
 .. code-block:: python
 
-    from mixpanel.tasks import track_event
+    from mixpanel.tasks import EventTracker
     from django.shortcuts import render_to_response
+
+    tracker = EventTracker()
+    track_event = lambda *a, **kw: tracker.run(*a, **kw)
 
     def test_view(request, template='test/test_view.html'):
         """
