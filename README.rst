@@ -22,4 +22,4 @@ implementation of a client for their service.
 .. _`Celery`: http://ask.github.com/celery/
 .. _`Mixpanel`: http://mixpanel.com/
 .. _`sphinx`: http://sphinx.pocoo.org/
-.. _`online mixpanel-celery documentation`: http://readthedocs.org/docs/mixpanel-celery
+.. _`online mixpanel-celery documentation`: http://mixpanel-celery.readthedocs.org
