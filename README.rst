@@ -13,8 +13,8 @@ the Mixpanel goodness without any of the potential performance impact.
 mixpanel-celery works great with Django, but because Celery works with just
 python, so does mixpanel-celery.
 
-For full documenation, you can build the `sphinx`_ documentation yourself or
-vist the `online mixpanel-celery documentation`_
+For full documenation vist the `online mixpanel-celery documentation`_ 
+(or build the `sphinx`_ documentation yourself).
 
 This project isn't affiliated with the `Mixpanel`_ company. Just a customer's
 implementation of a client for their service.
@@ -22,4 +22,4 @@ implementation of a client for their service.
 .. _`Celery`: http://ask.github.com/celery/
 .. _`Mixpanel`: http://mixpanel.com/
 .. _`sphinx`: http://sphinx.pocoo.org/
-.. _`online mixpanel-celery documentation`: http://winhamwr.github.com/mixpanel-celery/
+.. _`online mixpanel-celery documentation`: http://readthedocs.org/docs/mixpanel-celery
