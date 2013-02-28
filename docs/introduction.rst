@@ -107,15 +107,17 @@ Example usage in a Django view
         context = RequestContext(request, {})
         return render_to_response(template, context_instance=context)
 
+
 To pass the API key to your templates where you probably use the Mixpanel
- Javascript API, add the context_processor to your settings file
+Javascript API, add the context_processor to your settings file
 
 .. code-block:: python
-	TEMPLATE_CONTEXT_PROCESSORS = (
-		# ...
-		'fundedbyme.context_processors.mixpanel_key',
-		# ...
-	)
+    
+    TEMPLATE_CONTEXT_PROCESSORS = (
+        # ...
+        'fundedbyme.context_processors.mixpanel_key',
+        # ...
+    )
 
 Building the Documentation
 ==========================
