@@ -115,9 +115,17 @@ Javascript API, add the context_processor to your settings file
     
     TEMPLATE_CONTEXT_PROCESSORS = (
         # ...
-        'fundedbyme.context_processors.mixpanel_key',
+        'mixpanel.context_processors.api_key',
         # ...
     )
+
+
+Now in your templates you can access the API key like this
+
+.. code-block:: javascript
+    
+    mixpanel.init("{{ MIXPANEL_API_TOKEN }}");
+
 
 Building the Documentation
 ==========================
