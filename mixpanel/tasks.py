@@ -1,4 +1,5 @@
 import httplib
+import datetime
 import urllib
 import base64
 import urlparse
@@ -18,6 +19,7 @@ class EventTracker(Task):
     """
     name = "mixpanel.tasks.EventTracker"
     max_retries = mp_settings.MIXPANEL_MAX_RETRIES
+    endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
 
     class FailedEventRequest(Exception):
         """The attempted recording event failed because of a non-200 HTTP return code"""
@@ -118,12 +120,16 @@ class EventTracker(Task):
         Build HTTP params to record the given event and properties.
         """
         params = {'event': event, 'properties': properties}
+        return self._encode_params(params, is_test)
+
+    def _encode_params(self, params, is_test):
+        """
+        Encodes data and returns the urlencoded parameters
+        """
         data = base64.b64encode(simplejson.dumps(params))
 
         data_var = mp_settings.MIXPANEL_DATA_VARIABLE
-        url_params = urllib.urlencode({data_var: data, 'test': is_test})
-
-        return url_params
+        return urllib.urlencode({data_var: data, 'test': is_test})
 
     def _send_request(self, connection, params):
         """
@@ -131,9 +137,9 @@ class EventTracker(Task):
 
         Returns ``true`` if the event was logged by Mixpanel.
         """
-        endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
+
         try:
-            connection.request('GET', '%s?%s' % (endpoint, params))
+            connection.request('GET', '%s?%s' % (self.endpoint, params))
 
             response = connection.getresponse()
         except socket.error, message:
@@ -150,6 +156,57 @@ class EventTracker(Task):
         return True
 
 tasks.register(EventTracker)
+
+class PeopleTracker(EventTracker):
+    endpoint = mp_settings.MIXPANEL_PEOPLE_ENDPOINT
+    event_map = {
+        'set': '$set',
+        'add': '$increment',
+        'track_charge': '$append',
+    }
+
+    def run(self, event_name, properties=None, token=None, test=None,
+            throw_retry_error=False, **kwargs):
+        """
+        Track an People event occurrence to mixpanel through the API.
+
+        ``event_name`` is one of the following strings: set, add, track_charge
+        ``properties`` a dictionary of key/value pairs to pass to Mixpanel.
+        Must include a ``distinct_id`` key to identify the person.
+        The ``track_charge`` event requires an ``amount`` key.
+        ``token`` is (optionally) your Mixpanel api token. Not required if
+        you've already configured your MIXPANEL_API_TOKEN setting.
+        ``test`` is an optional override to your
+        `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for determining
+        if the event requests should actually be stored on the Mixpanel servers.
+        """
+        return super(PeopleTracker, self).run(event_name, properties, token,
+                     test, throw_retry_error=False, **kwargs)
+
+    def _build_params(self, event, properties, is_test):
+        """
+        Build HTTP params to record the given event and properties.
+        """
+        mp_key = self.event_map[event]
+        params = {
+            '$token': properties['token'],
+            '$distinct_id': properties['distinct_id'],
+        }
+        if event == 'track_charge':
+            time = properties.get('time', datetime.datetime.now().isoformat())
+            params[mp_key] = {'$transactions': {
+                '$time': time,
+                '$amount': properties['amount'],
+            }}
+        else:
+            # strip token and distinct_id out of the properties and use the
+            # rest for passing with $set and $increment
+            params[mp_key] = dict((k, v) for (k, v) in properties.iteritems()
+                                  if not k in ('token', 'distinct_id'))
+        print params
+        return self._encode_params(params, is_test)
+
+tasks.register(PeopleTracker)
 
 class FunnelEventTracker(EventTracker):
     """

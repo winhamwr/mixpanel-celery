@@ -1,14 +1,22 @@
 import unittest
+from datetime import datetime
 import base64
 import urllib
 import logging
+import mock
 
 from django.utils import simplejson
 
 from celery.exceptions import RetryTaskError
 
-from mixpanel.tasks import EventTracker, FunnelEventTracker
+from mixpanel.tasks import EventTracker, PeopleTracker, FunnelEventTracker
 from mixpanel.conf import settings as mp_settings
+
+
+class FakeDateTime(datetime):
+    "A fake replacement for datetime that can be mocked for testing."
+    def __new__(cls, *args, **kwargs):
+        return datetime.__new__(datetime, *args, **kwargs)
 
 class EventTrackerTest(unittest.TestCase):
     def setUp(self):
@@ -70,6 +78,56 @@ class EventTrackerTest(unittest.TestCase):
 
         expected_params = urllib.urlencode({
             'data':base64.b64encode(simplejson.dumps(params)),
+            'test':is_test,
+        })
+
+        self.assertEqual(expected_params, url_params)
+
+    @mock.patch('mixpanel.tasks.datetime.datetime', FakeDateTime)
+    def test_build_people_track_charge_params(self):
+        et = PeopleTracker()
+        now = datetime.now()
+        FakeDateTime.now = classmethod(lambda cls: now)
+        event = 'track_charge'
+        is_test = 1
+        properties = {'amount': 11.77, 'distinct_id': 'test_id',
+                      'token': 'testtoken'}
+        expected = {
+            '$append': {
+                '$transactions': {
+                    '$amount': 11.77,
+                    '$time': now.isoformat(),
+                }
+            },
+            '$distinct_id': 'test_id',
+            '$token': 'testtoken',
+        }
+        url_params = et._build_params(event, properties, is_test)
+        expected_params = urllib.urlencode({
+            'data':base64.b64encode(simplejson.dumps(expected)),
+            'test':is_test,
+        })
+
+        self.assertEqual(expected_params, url_params)
+
+    def test_build_people_set_params(self):
+        et = PeopleTracker()
+        event = 'set'
+        is_test = 1
+        properties = {'stuff': 'thing', 'blue': 'green',
+                      'distinct_id': 'test_id', 'token': 'testtoken'}
+        expected = {
+            '$distinct_id': 'test_id',
+            '$set': {
+                'stuff': 'thing',
+                'blue': 'green',
+            },
+            '$token': 'testtoken',
+        }
+        print expected
+        url_params = et._build_params(event, properties, is_test)
+        expected_params = urllib.urlencode({
+            'data':base64.b64encode(simplejson.dumps(expected)),
             'test':is_test,
         })
 

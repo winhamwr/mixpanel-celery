@@ -65,7 +65,7 @@ setup(
     scripts=[],
     zip_safe=False,
     install_requires=['celery>=1.0', 'django>=1.2'],
-    tests_require=['nose>=0.11', 'coverage'],
+    tests_require=['nose>=0.11', 'coverage', 'mock'],
     cmdclass = {'nosetests': RunTests},
     classifiers=[
         "Development Status :: 4 - Beta",
