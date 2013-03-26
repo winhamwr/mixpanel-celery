@@ -203,7 +203,6 @@ class PeopleTracker(EventTracker):
             # rest for passing with $set and $increment
             params[mp_key] = dict((k, v) for (k, v) in properties.iteritems()
                                   if not k in ('token', 'distinct_id'))
-        print params
         return self._encode_params(params, is_test)
 
 tasks.register(PeopleTracker)
