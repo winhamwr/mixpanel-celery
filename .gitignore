@@ -1,6 +1,7 @@
 .tox
 *.pyc
 .noseids
+.DS_Store
 
 
 # Packages
