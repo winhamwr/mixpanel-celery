@@ -132,21 +132,6 @@ class EventTrackerTest(unittest.TestCase):
 
         self.assertEqual(expected_params, url_params)
 
-    def test_failed_request(self):
-        mp_settings.MIXPANEL_TRACKING_ENDPOINT = 'brokenurl'
-
-        with eager_tasks():
-            result = EventTracker.delay('event_foo')
-
-        self.assertNotEqual(result.traceback, None)
-
-    def test_failed_socket_request(self):
-        mp_settings.MIXPANEL_API_SERVER = '127.0.0.1:60000'
-
-        with eager_tasks():
-            result = EventTracker.delay('event_foo')
-        self.assertNotEqual(result.traceback, None)
-
     def test_run(self):
         # "correct" result obtained from: http://mixpanel.com/api/docs/console
         et = EventTracker()
@@ -169,6 +154,34 @@ class EventTrackerTest(unittest.TestCase):
         result = et.run('event_foo', {}, loglevel=logging.DEBUG)
 
         self.assertTrue(result)
+
+
+class BrokenRequestsTest(unittest.TestCase):
+
+    def setUp(self):
+        mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
+        mp_settings.MIXPANEL_TEST_ONLY = True
+        mp_settings.MIXPANEL_API_SERVER = 'api.mixpanel.com'
+        mp_settings.MIXPANEL_TRACKING_ENDPOINT = '/track/'
+        EventTracker.endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
+
+    def tearDown(self):
+        EventTracker.endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
+
+    def test_failed_request(self):
+        EventTracker.endpoint = 'brokenurl'
+
+        with eager_tasks():
+            result = EventTracker.delay('event_foo')
+
+        self.assertNotEqual(result.traceback, None)
+
+    def test_failed_socket_request(self):
+        mp_settings.MIXPANEL_API_SERVER = '127.0.0.1:60000'
+
+        with eager_tasks():
+            result = EventTracker.delay('event_foo')
+        self.assertNotEqual(result.traceback, None)
 
 
 class FunnelEventTrackerTest(unittest.TestCase):
