@@ -5,10 +5,11 @@ import logging
 
 from django.utils import simplejson
 
-from celery.exceptions import RetryTaskError
+from celery.tests.utils import eager_tasks
 
 from mixpanel.tasks import EventTracker, FunnelEventTracker
 from mixpanel.conf import settings as mp_settings
+
 
 class EventTrackerTest(unittest.TestCase):
     def setUp(self):
@@ -69,8 +70,8 @@ class EventTrackerTest(unittest.TestCase):
         url_params = et._build_params(event, properties, is_test)
 
         expected_params = urllib.urlencode({
-            'data':base64.b64encode(simplejson.dumps(params)),
-            'test':is_test,
+            'data': base64.b64encode(simplejson.dumps(params)),
+            'test': is_test,
         })
 
         self.assertEqual(expected_params, url_params)
@@ -78,19 +79,17 @@ class EventTrackerTest(unittest.TestCase):
     def test_failed_request(self):
         mp_settings.MIXPANEL_TRACKING_ENDPOINT = 'brokenurl'
 
-        et = EventTracker()
-        self.assertRaises(RetryTaskError,
-                          et.run,
-                          'event_foo', throw_retry_error=True)
+        with eager_tasks():
+            result = EventTracker.delay('event_foo')
+
+        self.assertNotEqual(result.traceback, None)
 
     def test_failed_socket_request(self):
         mp_settings.MIXPANEL_API_SERVER = '127.0.0.1:60000'
 
-        et = EventTracker()
-        self.assertRaises(RetryTaskError,
-                          et.run,
-                          'event_foo', throw_retry_error=True)
-
+        with eager_tasks():
+            result = EventTracker.delay('event_foo')
+        self.assertNotEqual(result.traceback, None)
 
     def test_run(self):
         # "correct" result obtained from: http://mixpanel.com/api/docs/console
@@ -102,7 +101,8 @@ class EventTrackerTest(unittest.TestCase):
     def test_old_run(self):
         """non-recorded events should return False"""
         et = EventTracker()
-        # Times older than 3 hours don't get recorded according to: http://mixpanel.com/api/docs/specification
+        # Times older than 3 hours don't get recorded according to:
+        # http://mixpanel.com/api/docs/specification
         # equests will be rejected that are 3 hours older than present time
         result = et.run('event_foo', {'time': 1245613885})
 
@@ -113,6 +113,7 @@ class EventTrackerTest(unittest.TestCase):
         result = et.run('event_foo', {}, loglevel=logging.DEBUG)
 
         self.assertTrue(result)
+
 
 class FunnelEventTrackerTest(unittest.TestCase):
     def setUp(self):
@@ -136,7 +137,7 @@ class FunnelEventTrackerTest(unittest.TestCase):
 
         # only distinct
         properties = {'distinct_id': 'test_distinct_id'}
-        fp = fet._add_funnel_properties(properties, funnel, step, goal)
+        fet._add_funnel_properties(properties, funnel, step, goal)
 
         # only ip
         properties = {'ip': 'some_ip'}
@@ -147,7 +148,7 @@ class FunnelEventTrackerTest(unittest.TestCase):
         # both
         properties = {'distinct_id': 'test_distinct_id',
                       'ip': 'some_ip'}
-        fp = fet._add_funnel_properties(properties, funnel, step, goal)
+        fet._add_funnel_properties(properties, funnel, step, goal)
 
     def test_afp_properties(self):
         fet = FunnelEventTracker()

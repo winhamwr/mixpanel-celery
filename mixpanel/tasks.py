@@ -24,10 +24,10 @@ class EventTracker(Task):
         The attempted recording event failed because of a non-200 HTTP return
         code.
         """
-        pass
 
-    def run(self, event_name, properties=None, token=None, test=None,
-            throw_retry_error=False, **kwargs):
+    def run(
+        self, event_name, properties=None, token=None, test=None, **kwargs
+    ):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -69,21 +69,13 @@ class EventTracker(Task):
 
         try:
             result = self._send_request(conn, url_params)
-        except EventTracker.FailedEventRequest, exception:
+        except EventTracker.FailedEventRequest as e:
             conn.close()
             l.info("Event failed. Retrying: <%s>" % event_name)
-            kwargs.update({
-                'properties': properties,
-                'token': token,
-                'test': test})
-            self.retry(
-                args=[event_name],
-                kwargs=kwargs,
-                exc=exception,
+            raise EventTracker.retry(
+                exc=e,
                 countdown=mp_settings.MIXPANEL_RETRY_DELAY,
-                throw=throw_retry_error,
             )
-            return
         conn.close()
         if result:
             l.info("Event recorded/logged: <%s>" % event_name)
@@ -166,7 +158,7 @@ class EventTracker(Task):
             raise EventTracker.FailedEventRequest(
                 "The tracking request failed. "
                 "Non-200 response code was: "
-                "%s %s" % (response.status, response.reason)
+                "[%s] reason: [%s]" % (response.status, response.reason)
             )
 
         # Successful requests will generate a log
@@ -230,20 +222,13 @@ class FunnelEventTracker(EventTracker):
 
         try:
             result = self._send_request(conn, url_params)
-        except EventTracker.FailedEventRequest, exception:
+        except EventTracker.FailedEventRequest as e:
             conn.close()
             l.info("Funnel failed. Retrying: <%s>-<%s>" % (funnel, step))
-            kwargs.update({
-                'token': token,
-                'test': test})
-            self.retry(
-                args=[funnel, step, goal, properties],
-                kwargs=kwargs,
-                exc=exception,
+            raise FunnelEventTracker.retry(
+                exc=e,
                 countdown=mp_settings.MIXPANEL_RETRY_DELAY,
-                throw=throw_retry_error,
             )
-            return
         conn.close()
         if result:
             l.info("Funnel recorded/logged: <%s>-<%s>" % (funnel, step))
