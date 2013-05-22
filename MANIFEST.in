@@ -5,6 +5,7 @@ include MANIFEST.in
 include LICENSE
 include setup.py
 include tox.ini
+include pypi_description.rst
 recursive-include docs *
 recursive-include mixpanel *.py
 recursive-include scripts *

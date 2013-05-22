@@ -5,7 +5,7 @@ import os
 
 from setuptools import setup, Command
 
-long_description = codecs.open("README.rst", "r", "utf-8").read()
+long_description = codecs.open("pypi_description.rst", "r", "utf-8").read()
 
 CLASSIFIERS = [
     "Development Status :: 4 - Beta",
