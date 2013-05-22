@@ -1,7 +1,6 @@
 import httplib
 import urllib
 import base64
-import urlparse
 import logging
 import socket
 
@@ -12,6 +11,7 @@ from celery.registry import tasks
 
 from mixpanel.conf import settings as mp_settings
 
+
 class EventTracker(Task):
     """
     Task to track a Mixpanel event.
@@ -20,7 +20,10 @@ class EventTracker(Task):
     max_retries = mp_settings.MIXPANEL_MAX_RETRIES
 
     class FailedEventRequest(Exception):
-        """The attempted recording event failed because of a non-200 HTTP return code"""
+        """
+        The attempted recording event failed because of a non-200 HTTP return
+        code.
+        """
         pass
 
     def run(self, event_name, properties=None, token=None, test=None,
@@ -35,13 +38,14 @@ class EventTracker(Task):
         ``token`` is (optionally) your Mixpanel api token. Not required if
         you've already configured your MIXPANEL_API_TOKEN setting.
         ``test`` is an optional override to your
-        `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for determining
-        if the event requests should actually be stored on the Mixpanel servers.
+        `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for
+        determining if the event requests should actually be stored on the
+        Mixpanel servers.
         """
         l = self.get_logger(**kwargs)
         l.info("Recording event: <%s>" % event_name)
 
-        # Verbose for clarity
+        # Celery 3.x changed the way the logger could be accessed
         if hasattr(l, 'getEffectiveLevel'):
             # celery 3.x
             effective_level = l.getEffectiveLevel()
@@ -55,7 +59,11 @@ class EventTracker(Task):
         is_test = self._is_test(test)
         generated_properties = self._handle_properties(properties, token)
 
-        url_params = self._build_params(event_name, generated_properties, is_test)
+        url_params = self._build_params(
+            event_name,
+            generated_properties,
+            is_test,
+        )
         l.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
 
@@ -68,11 +76,13 @@ class EventTracker(Task):
                 'properties': properties,
                 'token': token,
                 'test': test})
-            self.retry(args=[event_name],
-                       kwargs=kwargs,
-                       exc=exception,
-                       countdown=mp_settings.MIXPANEL_RETRY_DELAY,
-                       throw=throw_retry_error)
+            self.retry(
+                args=[event_name],
+                kwargs=kwargs,
+                exc=exception,
+                countdown=mp_settings.MIXPANEL_RETRY_DELAY,
+                throw=throw_retry_error,
+            )
             return
         conn.close()
         if result:
@@ -84,9 +94,10 @@ class EventTracker(Task):
 
     def _is_test(self, test):
         """
-        Determine whether this event should be logged as a test request, meaning
-        it won't actually be stored on the Mixpanel servers. A return result of
-        1 means this will be a test, 0 means it won't as per the API spec.
+        Determine whether this event should be logged as a test request,
+        meaning it won't actually be stored on the Mixpanel servers. A return
+        result of 1 means this will be a test, 0 means it won't as per the API
+        spec.
 
         Uses ``:mod:mixpanel.conf.settings.MIXPANEL_TEST_ONLY`` as the default
         if no explicit test option is given.
@@ -146,10 +157,17 @@ class EventTracker(Task):
 
             response = connection.getresponse()
         except socket.error, message:
-            raise EventTracker.FailedEventRequest("The tracking request failed with a socket error. Message: [%s]" % message)
+            raise EventTracker.FailedEventRequest(
+                "The tracking request failed with a socket error. "
+                "Message: [%s]" % message
+            )
 
         if response.status != 200 or response.reason != 'OK':
-            raise EventTracker.FailedEventRequest("The tracking request failed. Non-200 response code was: %s %s" % (response.status, response.reason))
+            raise EventTracker.FailedEventRequest(
+                "The tracking request failed. "
+                "Non-200 response code was: "
+                "%s %s" % (response.status, response.reason)
+            )
 
         # Successful requests will generate a log
         response_data = response.read()
@@ -159,6 +177,7 @@ class EventTracker(Task):
         return True
 
 tasks.register(EventTracker)
+
 
 class FunnelEventTracker(EventTracker):
     """
@@ -185,18 +204,27 @@ class FunnelEventTracker(EventTracker):
         ``token`` is (optionally) your Mixpanel api token. Not required if
         you've already configured your MIXPANEL_API_TOKEN setting.
         ``test`` is an optional override to your
-        `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for determining
-        if the event requests should actually be stored on the Mixpanel servers.
+        `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for
+        determining if the event requests should actually be stored on the
+        Mixpanel servers.
         """
         l = self.get_logger(**kwargs)
         l.info("Recording funnel: <%s>-<%s>" % (funnel, step))
         properties = self._handle_properties(properties, token)
 
         is_test = self._is_test(test)
-        properties = self._add_funnel_properties(properties, funnel, step, goal)
+        properties = self._add_funnel_properties(
+            properties,
+            funnel,
+            step,
+            goal,
+        )
 
-        url_params = self._build_params(mp_settings.MIXPANEL_FUNNEL_EVENT_ID,
-                                        properties, is_test)
+        url_params = self._build_params(
+            mp_settings.MIXPANEL_FUNNEL_EVENT_ID,
+            properties,
+            is_test,
+        )
         l.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
 
@@ -208,11 +236,13 @@ class FunnelEventTracker(EventTracker):
             kwargs.update({
                 'token': token,
                 'test': test})
-            self.retry(args=[funnel, step, goal, properties],
-                       kwargs=kwargs,
-                       exc=exception,
-                       countdown=mp_settings.MIXPANEL_RETRY_DELAY,
-                       throw=throw_retry_error)
+            self.retry(
+                args=[funnel, step, goal, properties],
+                kwargs=kwargs,
+                exc=exception,
+                countdown=mp_settings.MIXPANEL_RETRY_DELAY,
+                throw=throw_retry_error,
+            )
             return
         conn.close()
         if result:
@@ -223,9 +253,10 @@ class FunnelEventTracker(EventTracker):
         return result
 
     def _add_funnel_properties(self, properties, funnel, step, goal):
-        if not properties.has_key('distinct_id'):
-            error_msg = "A ``distinct_id`` must be given to record a funnel event"
-            raise FunnelEventTracker.InvalidFunnelProperties(error_msg)
+        if 'distinct_id' not in properties:
+            raise FunnelEventTracker.InvalidFunnelProperties(
+                "A 'distinct_id' must be given to record a funnel event"
+            )
         properties['funnel'] = funnel
         properties['step'] = step
         properties['goal'] = goal
