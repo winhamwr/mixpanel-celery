@@ -1,6 +1,18 @@
 Changelog
 =========
 
+0.6.1
+-----
+
+Back to 0.5.0 logging behavior on retry
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If only I had listened to
+[past Wes](https://groups.google.com/forum/#!msg/celery-users/TbsqdbYE184/ZO8i0vqbW2wJ),
+I would have realized that my retry change would cause excess logging.
+You'll no longer get messages logged when an Event fails and is retried.
+You'll only be alerted if it reaches max retries.
+
 0.6.0
 -----
 

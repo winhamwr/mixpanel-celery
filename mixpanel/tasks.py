@@ -73,10 +73,11 @@ class EventTracker(Task):
         except EventTracker.FailedEventRequest as e:
             conn.close()
             l.info("Event failed. Retrying: <%s>" % event_name)
-            raise EventTracker.retry(
+            EventTracker.retry(
                 exc=e,
                 countdown=mp_settings.MIXPANEL_RETRY_DELAY,
             )
+            return
         conn.close()
         if result:
             l.info("Event recorded/logged: <%s>" % event_name)
@@ -248,8 +249,9 @@ class FunnelEventTracker(EventTracker):
         """Required properties were missing from the funnel-tracking call"""
         pass
 
-    def run(self, funnel, step, goal, properties, token=None, test=None,
-            throw_retry_error=False, **kwargs):
+    def run(
+        self, funnel, step, goal, properties, token=None, test=None, **kwargs
+    ):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -291,10 +293,11 @@ class FunnelEventTracker(EventTracker):
         except EventTracker.FailedEventRequest as e:
             conn.close()
             l.info("Funnel failed. Retrying: <%s>-<%s>" % (funnel, step))
-            raise FunnelEventTracker.retry(
+            FunnelEventTracker.retry(
                 exc=e,
                 countdown=mp_settings.MIXPANEL_RETRY_DELAY,
             )
+            return
         conn.close()
         if result:
             l.info("Funnel recorded/logged: <%s>-<%s>" % (funnel, step))
