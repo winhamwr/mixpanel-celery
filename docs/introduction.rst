@@ -29,25 +29,28 @@ Installing The Stable Version
     $ pip install mixpanel-celery
 
 
-Installing The Development Version
-----------------------------------
-
-.. code-block:: bash
-
-    $ pip install -e git+git://github.com/winhamwr/mixpanel-celery.git#egg=mixpanel-celery
-
 Running The Test Suite
 ======================
 
-Setuptools' ``test`` command is the easiest way to run the test suite.
+We use Tox to test across all of our supported environments.
 
 .. code-block:: bash
 
-    $ cd /path/to/mixpanel-celery
+    $ pip install tox
+    $ tox
+
+If you'd just like to test for the version of python and Celery that you use,
+install the appropriate requirements listed in the ``requirements`` folder, and
+then run your tests. eg.
+
+.. code-block:: bash
+
+    $ pip install -r requirements/test_celery_default.txt
+    $ pip install -r requirements/test_django_default.txt
     $ python setup.py test
 
-Currently, two tests will fail unless you configure `RabbitMQ`_ specifically for
-the test suite.
+Right now, the test suite requires Django, but we'd love a pull request to
+remove that requirement.
 
 It is also possible to run specific tests using ``nosetests`` directly.
 
@@ -76,8 +79,12 @@ Basic python example tracking an event called ``my_event``
 
     from mixpanel.tasks import EventTracker
 
-    et = EventTracker()
-    et.run('my_event', {'distinct_id': 1}, token='YOUR_API_TOKEN')
+    result = EventTracker.delay(
+        'my_event',
+        {'distinct_id': 1},
+        token='YOUR_API_TOKEN',
+    )
+    result.wait()
 
 
 Example usage in a Django view
@@ -85,27 +92,23 @@ Example usage in a Django view
 .. code-block:: python
 
     from mixpanel.tasks import EventTracker
-    from django.shortcuts import render_to_response
-
-    tracker = EventTracker()
-    track_event = lambda *a, **kw: tracker.run(*a, **kw)
+    from django.shortcuts import render
 
     def test_view(request, template='test/test_view.html'):
         """
         Show user a test page.
         """
         # We should record that the user hit this page
-        track_event('hit_test_view', {'distinct_id': request.user.pk})
+        EventTracker.delay('hit_test_view', {'distinct_id': request.user.pk})
 
-        context = RequestContext(request, {})
-        return render_to_response(template, context_instance=context)
+        return render(template)
 
 
 To pass the API key to your templates where you probably use the Mixpanel
 Javascript API, add the context_processor to your settings file
 
 .. code-block:: python
-    
+
     TEMPLATE_CONTEXT_PROCESSORS = (
         # ...
         'mixpanel.context_processors.api_key',
@@ -116,7 +119,7 @@ Javascript API, add the context_processor to your settings file
 Now in your templates you can access the API key like this
 
 .. code-block:: javascript
-    
+
     mixpanel.init("{{ MIXPANEL_API_TOKEN }}");
 
 
