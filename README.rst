@@ -6,6 +6,8 @@ Documentation
 =============
 
 .. image:: https://travis-ci.org/winhamwr/mixpanel-celery.png?branch=master
+    :alt: Build Status
+    :target: https://travis-ci.org/winhamwr/mixpanel-celery
 
 mixpanel-celery helps you use `Celery`_ to asynchronously track your `Mixpanel`_
 events. Waiting on HTTP requests to Mixpanel's api to complete every time you
