@@ -5,6 +5,8 @@ import sys
 import os
 
 from setuptools import setup, find_packages, Command
+from setuptools.command.test import test as TestCommand
+
 
 import mixpanel
 
@@ -50,6 +52,19 @@ class RunTests(Command):
     def finalize_options(self):
         pass
 
+
+class Tox(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+    def run_tests(self):
+        #import here, cause outside the eggs aren't loaded
+        import tox
+        errno = tox.cmdline(self.test_args)
+        sys.exit(errno)
+
+
 long_description = codecs.open("README.rst", "r", "utf-8").read()
 
 setup(
@@ -65,8 +80,8 @@ setup(
     scripts=[],
     zip_safe=False,
     install_requires=['celery>=1.0', 'django>=1.2'],
-    tests_require=['nose>=0.11', 'coverage'],
-    cmdclass = {'nosetests': RunTests},
+    tests_require=['nose>=0.11', 'coverage', 'tox'],
+    cmdclass = {'nosetests': RunTests, 'test': Tox},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: Django",
