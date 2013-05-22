@@ -1,11 +1,10 @@
-import httplib
-import datetime
-import urllib
 import base64
+import datetime
+import httplib
+import json
 import logging
 import socket
-
-from django.utils import simplejson
+import urllib
 
 from celery.task import Task
 from celery.registry import tasks
@@ -138,7 +137,7 @@ class EventTracker(Task):
         """
         Encodes data and returns the urlencoded parameters
         """
-        data = base64.b64encode(simplejson.dumps(params))
+        data = base64.b64encode(json.dumps(params))
 
         data_var = mp_settings.MIXPANEL_DATA_VARIABLE
         return urllib.urlencode({data_var: data, 'test': is_test})
