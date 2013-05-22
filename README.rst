@@ -5,6 +5,10 @@
 Documentation
 =============
 
+.. image:: https://travis-ci.org/winhamwr/mixpanel-celery.png?branch=master
+    :alt: Build Status
+    :target: https://travis-ci.org/winhamwr/mixpanel-celery
+
 mixpanel-celery helps you use `Celery`_ to asynchronously track your `Mixpanel`_
 events. Waiting on HTTP requests to Mixpanel's api to complete every time you
 want to record something slows you down. Using mixpanel-celery gives you all of
@@ -13,7 +17,7 @@ the Mixpanel goodness without any of the potential performance impact.
 mixpanel-celery works great with Django, but because Celery works with just
 python, so does mixpanel-celery.
 
-For full documenation vist the `online mixpanel-celery documentation`_ 
+For full documenation vist the `online mixpanel-celery documentation`_
 (or build the `sphinx`_ documentation yourself).
 
 This project isn't affiliated with the `Mixpanel`_ company. Just a customer's
