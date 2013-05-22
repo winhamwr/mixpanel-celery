@@ -49,3 +49,5 @@ INSTALLED_APPS = (
 
 MIXPANEL_API_TOKEN = 'testmixpanel'
 SEND_CELERY_TASK_ERROR_EMAILS = False
+
+SECRET_KEY = 'testmixpanel'
