@@ -1,8 +1,8 @@
 include AUTHORS
-include README.rst
+include README.md
+include CHANGELOG.rst
 include MANIFEST.in
 include LICENSE
-include Makefile
 include setup.py
 include tox.ini
 recursive-include docs *
