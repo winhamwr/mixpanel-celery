@@ -1,9 +1,3 @@
-test:
-	(scripts/run_tests.py)
-
-coverage:
-	(scripts/run_tests.py --coverage)
-
 removepyc:
 	find . -name "*.pyc" | xargs rm
 

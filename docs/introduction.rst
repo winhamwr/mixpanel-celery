@@ -39,24 +39,17 @@ Installing The Development Version
 Running The Test Suite
 ======================
 
-Setuptools' ``nosetests`` command is the easiest way to run the test suite.
+Setuptools' ``test`` command is the easiest way to run the test suite.
 
 .. code-block:: bash
 
     $ cd /path/to/mixpanel-celery
-    $ python setup.py nosetests
+    $ python setup.py test
 
 Currently, two tests will fail unless you configure `RabbitMQ`_ specifically for
 the test suite.
 
-It is also possible to run specific tests, disable coverage, use
-``--multiprocess``, etc. by using the ``scripts/run_tests.py`` script. For
-example, to only run a  single test
-
-.. code-block:: bash
-
-    $ cd /path/to/mixpanel-celery/scripts
-    $ ./run_tests.py mixpanel.test.test_tasks:EventTrackerTest.test_handle_properties_no_token
+It is also possible to run specific tests using ``nosetests`` directly.
 
 Configuration
 =============
