@@ -3,10 +3,9 @@ include README.rst
 include MANIFEST.in
 include LICENSE
 include Makefile
+include tox.ini
 recursive-include docs *
 recursive-include mixpanel *.py
 recursive-include scripts *
 recursive-include testproj *.py
-prune docs/*.pyc
-prune mixpanel/*.pyc
 prune docs/.build

@@ -9,6 +9,7 @@ from setuptools.command.test import test as TestCommand
 
 import mixpanel
 
+
 class RunTests(Command):
     description = "Run the test suite from the tests dir."
     user_options = []
@@ -57,6 +58,7 @@ class Tox(TestCommand):
         TestCommand.finalize_options(self)
         self.test_args = []
         self.test_suite = True
+
     def run_tests(self):
         #import here, cause outside the eggs aren't loaded
         import tox
@@ -80,7 +82,7 @@ setup(
     zip_safe=False,
     install_requires=['celery>=1.0', 'django>=1.2'],
     tests_require=['nose>=0.11', 'coverage', 'tox'],
-    cmdclass = {'nosetests': RunTests, 'test': Tox},
+    cmdclass={'nosetests': RunTests, 'test': Tox},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: Django",
