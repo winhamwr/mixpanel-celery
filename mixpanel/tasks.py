@@ -40,7 +40,16 @@ class EventTracker(Task):
         """
         l = self.get_logger(**kwargs)
         l.info("Recording event: <%s>" % event_name)
-        if l.getEffectiveLevel() == logging.DEBUG:
+
+        # Verbose for clarity
+        if hasattr(l, 'getEffectiveLevel'):
+            # celery 3.x
+            effective_level = l.getEffectiveLevel()
+        else:
+            # Fall back to celery 2.x support
+            effective_level = l.logger.getEffectiveLevel()
+
+        if effective_level == logging.DEBUG:
             httplib.HTTPConnection.debuglevel = 1
 
         is_test = self._is_test(test)
