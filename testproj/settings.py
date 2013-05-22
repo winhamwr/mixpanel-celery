@@ -36,7 +36,7 @@ INSTALLED_APPS = (
 )
 
 NOSE_ARGS = [
-    os.path.join(here, os.pardir, 'mixpanel', 'test'),
+    os.path.join(here, os.pardir, 'mixpanel', 'tests'),
     os.environ.get("NOSE_VERBOSE") and "--verbose" or "",
 ]
 TEST_RUNNER = 'django_nose.run_tests'
