@@ -7,7 +7,6 @@ import os
 from setuptools import setup, find_packages, Command
 from setuptools.command.test import test as TestCommand
 
-
 import mixpanel
 
 class RunTests(Command):
