@@ -3,7 +3,7 @@ import codecs
 import sys
 import os
 
-from setuptools import setup, Command
+from setuptools import find_packages, setup, Command
 
 long_description = codecs.open("pypi_description.rst", "r", "utf-8").read()
 
@@ -136,7 +136,7 @@ setup(
     author_email=meta['contact'],
     url=meta['homepage'],
     long_description=long_description,
-    packages=['mixpanel'],
+    packages=['mixpanel', 'mixpanel.conf'],
     license='BSD',
     platforms=['any'],
     classifiers=CLASSIFIERS,
