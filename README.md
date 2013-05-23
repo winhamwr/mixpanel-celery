@@ -42,6 +42,16 @@ Would you like to know more?
 Well then you should [read the docs](http://mixpanel-celery.readthedocs.org),
 [citizen](http://tvtropes.org/pmwiki/pmwiki.php/Film/StarshipTroopers).
 
+## Contributing
+
+We love pull requests!
+Send us one, and you'll probably make Wes's day.
+
+For details,
+check out the
+[contribution tips](http://mixpanel-celery.readthedocs.org/en/latest/contributing.html)
+documentation.
+
 ## We like Mixpanel and Celery
 
 This project isn't affiliated with the Mixpanel company.
