@@ -21,7 +21,7 @@ CLASSIFIERS = [
 NAME = 'mixpanel-celery'
 
 # Distribution Meta stuff because importing the module on install is bad
-# Mostly cribbed fro Celery's setup.py
+# Mostly cribbed from Celery's setup.py
 
 import re
 

@@ -144,7 +144,7 @@ class EventTrackerTest(unittest.TestCase):
         et = EventTracker()
         # Times older than 3 hours don't get recorded according to:
         # http://mixpanel.com/api/docs/specification
-        # equests will be rejected that are 3 hours older than present time
+        # requests will be rejected that are 3 hours older than present time
         result = et.run('event_foo', {'time': 1245613885})
 
         self.assertFalse(result)
