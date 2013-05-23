@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.6.2
+-----
+
+Packaging Fix
+~~~~~~~~~~~~~
+
+Packaging is hard.
+Let's go shopping.
+Thanks to Daniel Koepke for the fix!
+
 0.6.1
 -----
 

@@ -136,7 +136,7 @@ setup(
     author_email=meta['contact'],
     url=meta['homepage'],
     long_description=long_description,
-    packages=['mixpanel', 'mixpanel.conf'],
+    packages=find_packages(exclude=["*.tests", "*.tests.*"]),
     license='BSD',
     platforms=['any'],
     classifiers=CLASSIFIERS,
