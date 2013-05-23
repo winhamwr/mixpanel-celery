@@ -8,6 +8,7 @@ Contents:
 
    introduction
    configuration
+   contributing
    reference/index
 
 
