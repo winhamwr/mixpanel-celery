@@ -221,10 +221,15 @@ class PeopleTracker(EventTracker):
         }
         if event == 'track_charge':
             time = properties.get('time', datetime.datetime.now().isoformat())
-            params[mp_key] = {'$transactions': {
-                '$time': time,
-                '$amount': properties['amount'],
-            }}
+            transactions = dict(
+                (k, v) for (k, v) in properties.iteritems()
+                if not k in ('token', 'distinct_id', 'amount')
+            )
+
+            transactions['$time'] = time
+            transactions['$amount'] = properties['amount']
+            params[mp_key] = {'$transactions': transactions}
+
         else:
             # strip token and distinct_id out of the properties and use the
             # rest for passing with $set and $increment

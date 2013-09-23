@@ -2,6 +2,7 @@ import base64
 import logging
 import unittest
 import urllib
+import urlparse
 from datetime import datetime
 
 import mock
@@ -85,30 +86,35 @@ class EventTrackerTest(unittest.TestCase):
 
     @mock.patch('mixpanel.tasks.datetime.datetime', FakeDateTime)
     def test_build_people_track_charge_params(self):
+        self.maxDiff = None
         et = PeopleTracker()
         now = datetime.now()
         FakeDateTime.now = classmethod(lambda cls: now)
-        event = 'track_charge'
+        event = u'track_charge'
         is_test = 1
-        properties = {'amount': 11.77, 'distinct_id': 'test_id',
-                      'token': 'testtoken'}
+        properties = {u'amount': 11.77, u'distinct_id': u'test_id',
+                      u'token': u'testtoken', u'extra': u'extra'}
         expected = {
-            '$append': {
-                '$transactions': {
-                    '$amount': 11.77,
-                    '$time': now.isoformat(),
+            u'$append': {
+                u'$transactions': {
+                    u'$amount': 11.77,
+                    u'$time': unicode(now.isoformat()),
+                    u'extra': 'extra'
                 }
             },
-            '$distinct_id': 'test_id',
-            '$token': 'testtoken',
+            u'$distinct_id': u'test_id',
+            u'$token': u'testtoken',
         }
         url_params = et._build_params(event, properties, is_test)
-        expected_params = urllib.urlencode({
-            'data': base64.b64encode(simplejson.dumps(expected)),
-            'test': is_test,
-        })
+        parsed = dict(urlparse.parse_qsl(url_params, True))
+        parsed[u'data'] = simplejson.loads(base64.b64decode(parsed['data']))
 
-        self.assertEqual(expected_params, url_params)
+        expected_params = {
+            u'data': expected,
+            u'test': unicode(is_test),
+        }
+
+        self.assertEqual(expected_params, parsed)
 
     def test_build_people_set_params(self):
         et = PeopleTracker()
