@@ -1,6 +1,21 @@
 Changelog
 =========
 
+0.7.0
+-----
+
+PeopleTracker plus plus
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Thanks to `Christopher Lambacher <https://github.com/lambacck>`_,
+the PeopleTracker API now has 
+`documentation <http://mixpanel-celery.readthedocs.org/en/latest/introduction.html#people-tracker-usage>`_.
+Even better,
+you can now attach your own customer properties
+to ``track_charge`` calls,
+just as you can with the javascript API.
+Thanks Christopher!
+
 0.6.2
 -----
 
@@ -18,7 +33,7 @@ Back to 0.5.0 logging behavior on retry
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If only I had listened to
-[past Wes](https://groups.google.com/forum/#!msg/celery-users/TbsqdbYE184/ZO8i0vqbW2wJ),
+`past Wes <https://groups.google.com/forum/#!msg/celery-users/TbsqdbYE184/ZO8i0vqbW2wJ>`_,
 I would have realized that my retry change would cause excess logging.
 You'll no longer get messages logged when an Event fails and is retried.
 You'll only be alerted if it reaches max retries.
