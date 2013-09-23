@@ -10,8 +10,9 @@ PeopleTracker plus plus
 Thanks to `Christopher Lambacher <https://github.com/lambacck>`_,
 the PeopleTracker API now has 
 `documentation <http://mixpanel-celery.readthedocs.org/en/latest/introduction.html#people-tracker-usage>`_.
+
 Even better,
-you can now attach your own customer properties
+you can now attach your own custom properties
 to ``track_charge`` calls,
 just as you can with the javascript API.
 Thanks Christopher!
