@@ -5,3 +5,4 @@
 # Packages
 *.egg
 __pycache__
+*.egg-info

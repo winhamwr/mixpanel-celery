@@ -123,6 +123,94 @@ Now in your templates you can access the API key like this
     mixpanel.init("{{ MIXPANEL_API_TOKEN }}");
 
 
+People Tracker Usage
+--------------------
+
+mixpanel-celery also supports the People Tracker API which allows you store
+user profiles in `Mixpanel's People Analytics product
+<https://mixpanel.com/people/>`__. The API for this is
+based on the `Mixpanel JavaScript People API
+<https://mixpanel.com/help/reference/javascript#storing-user-profiles>`__.
+Three calls are supported at this time: ``set``, ``add``, and ``track_charge``.
+The ``add`` command is the ``mixpanel.people.increment`` in the JavaScript API.
+
+To set profile property values using the ``set`` event:
+
+.. code-block:: python
+
+    from mixpanel.tasks import PeopleTracker
+
+    result = PeopleTracker.delay(
+        'set',
+        {
+            'distinct_id': 1, 
+            'Plan': 'Premium',
+            # you can set many properties in one call
+            'discount end': '2013-01-01'
+
+        },
+        token='YOUR_API_TOKEN',
+    )
+    result.wait()
+
+
+The above would set the ``Plan`` property to ``Premium`` for the profile with
+the mixpanel distinct id of 1. To increment profile property values using the
+``add`` event:
+
+.. code-block:: python
+
+    from mixpanel.tasks import PeopleTracker
+
+    result = PeopleTracker.delay(
+        'add',
+        {
+            'distinct_id': 1, 
+            # differs for JS API. You must provide 
+            # an increment value. There is no default
+            'games played': 1, 
+            'points earned: 500,
+            # subtract by providing a negative value
+            'credits remaining': -34
+        },
+        token='YOUR_API_TOKEN',
+    )
+    result.wait()
+
+You can also track charges using the ``track_charge`` event:
+
+.. code-block:: python
+
+    from mixpanel.tasks import PeopleTracker
+
+    result = PeopleTracker.delay(
+        'track_charge',
+        {
+            'distinct_id': 1, 
+            # this value is required
+            'amount': 100, 
+            # optionally can have other properties
+            'order_id': 6543
+        },
+        token='YOUR_API_TOKEN',
+    )
+    result.wait()
+
+    result = PeopleTracker.delay(
+        'track_charge',
+        {
+            'distinct_id': 1, 
+            # use negative value for refund
+            'amount': -50, 
+        },
+        token='YOUR_API_TOKEN',
+    )
+    result.wait()
+
+The ``track_charge`` event differs from the JS API in that you can't override
+the time of the transaction.
+
+
 Building the Documentation
 ==========================
 
