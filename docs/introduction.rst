@@ -24,7 +24,7 @@ via `pip`_
 Installing The Stable Version
 -----------------------------
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ pip install mixpanel-celery
 
@@ -34,7 +34,7 @@ Running The Test Suite
 
 We use Tox to test across all of our supported environments.
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ pip install tox
     $ tox
@@ -43,7 +43,7 @@ If you'd just like to test for the version of python and Celery that you use,
 install the appropriate requirements listed in the ``requirements`` folder, and
 then run your tests. eg.
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ pip install -r requirements/test_celery_default.txt
     $ pip install -r requirements/test_django_default.txt
@@ -64,11 +64,36 @@ For easy test usage with Django, set your Mixpanel api token in your project's
 
 So that all of your `Celery`_ tasks will run in-line for now.
 
-Then add ``mixpanel`` to your list of ``INSTALLED_APPS``.
-
 Note: Obviously you'll want to actually configure `Celery`_ using one of the
 many available backends for actual production use and `Celery`_ has great
 documentation on that.
+
+
+With ``django-celery`` and Celery <3.1
+--------------------------------------
+
+If you're using an older version of Celery
+along with the ``djcelery.setup_loader()`` integration method,
+just add ``mixpanel`` to your list of ``INSTALLED_APPS``.
+
+Normal Celery Configuration
+---------------------------
+
+If you're not using ``django-celery``,
+you must add the ``mixpanel.tasks`` module
+to your ``include``.
+Otherwise,
+Celery won't know about the ``mixpanel-celery`` tasks.
+
+Your configuration should look something like:
+
+.. code-block:: python
+
+    celery = Celery(
+        'myproject',
+        broker=settings.REDIS_URL,
+        include=['myproject.tasks', 'mixpanel.tasks'],
+    )
 
 Usage
 =====
@@ -143,7 +168,7 @@ To set profile property values using the ``set`` event:
     result = PeopleTracker.delay(
         'set',
         {
-            'distinct_id': 1, 
+            'distinct_id': 1,
             'Plan': 'Premium',
             # you can set many properties in one call
             'discount end': '2013-01-01'
@@ -165,10 +190,10 @@ the mixpanel distinct id of 1. To increment profile property values using the
     result = PeopleTracker.delay(
         'add',
         {
-            'distinct_id': 1, 
-            # differs for JS API. You must provide 
+            'distinct_id': 1,
+            # differs for JS API. You must provide
             # an increment value. There is no default
-            'games played': 1, 
+            'games played': 1,
             'points earned: 500,
             # subtract by providing a negative value
             'credits remaining': -34
@@ -186,9 +211,9 @@ You can also track charges using the ``track_charge`` event:
     result = PeopleTracker.delay(
         'track_charge',
         {
-            'distinct_id': 1, 
+            'distinct_id': 1,
             # this value is required
-            'amount': 100, 
+            'amount': 100,
             # optionally can have other properties
             'order_id': 6543
         },
@@ -199,9 +224,9 @@ You can also track charges using the ``track_charge`` event:
     result = PeopleTracker.delay(
         'track_charge',
         {
-            'distinct_id': 1, 
+            'distinct_id': 1,
             # use negative value for refund
-            'amount': -50, 
+            'amount': -50,
         },
         token='YOUR_API_TOKEN',
     )
@@ -216,7 +241,7 @@ Building the Documentation
 
 mixpanel-celery uses `sphinx`_ for documentation. To build the HTML docs
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ pip install sphinx
     $ pip install sphinxtogithub
