@@ -6,7 +6,12 @@ import urlparse
 from datetime import datetime
 
 import mock
-from celery.tests.utils import eager_tasks
+try:
+    from celery.tests.utils import eager_tasks
+except ImportError:
+    # Celery 3.1 removed the eager_tasks decorator
+    from mixpanel.tests.utils import eager_tasks
+
 from django.utils import simplejson
 
 from mixpanel.tasks import EventTracker, PeopleTracker, FunnelEventTracker
