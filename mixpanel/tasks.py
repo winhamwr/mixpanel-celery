@@ -181,7 +181,7 @@ class PeopleTracker(EventTracker):
     endpoint = mp_settings.MIXPANEL_PEOPLE_ENDPOINT
     event_map = {
         'set': '$set',
-        'add': '$increment',
+        'add': '$add',
         'track_charge': '$append',
     }
 
