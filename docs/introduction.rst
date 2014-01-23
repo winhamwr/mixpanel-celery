@@ -71,8 +71,8 @@ So that all of your `Celery`_ tasks will run in-line for now.
     `Celery`_ has great documentation on that.
 
 
-With Celery >=3.1
------------------
+With Celery 3.1 and above
+-------------------------
 
 If you're not using ``django-celery``,
 you must add the ``mixpanel.tasks`` module
@@ -90,8 +90,8 @@ Your configuration should look something like:
         include=['myproject.tasks', 'mixpanel.tasks'],
     )
 
-With ``django-celery`` and Celery <3.1
---------------------------------------
+With ``django-celery`` and Celery 3.0 or lower
+-----------------------------------------------
 
 If you're using an older version of Celery
 along with the now-deprecated combination of
