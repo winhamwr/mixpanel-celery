@@ -64,20 +64,15 @@ For easy test usage with Django, set your Mixpanel api token in your project's
 
 So that all of your `Celery`_ tasks will run in-line for now.
 
-Note: Obviously you'll want to actually configure `Celery`_ using one of the
-many available backends for actual production use and `Celery`_ has great
-documentation on that.
+.. note::
+
+    Obviously you'll want to actually configure `Celery`_ using one of the
+    many available backends for actual production use.
+    `Celery`_ has great documentation on that.
 
 
-With ``django-celery`` and Celery <3.1
---------------------------------------
-
-If you're using an older version of Celery
-along with the ``djcelery.setup_loader()`` integration method,
-just add ``mixpanel`` to your list of ``INSTALLED_APPS``.
-
-Normal Celery Configuration
----------------------------
+With Celery >=3.1
+-----------------
 
 If you're not using ``django-celery``,
 you must add the ``mixpanel.tasks`` module
@@ -94,6 +89,15 @@ Your configuration should look something like:
         broker=settings.REDIS_URL,
         include=['myproject.tasks', 'mixpanel.tasks'],
     )
+
+With ``django-celery`` and Celery <3.1
+--------------------------------------
+
+If you're using an older version of Celery
+along with the now-deprecated combination of
+``django-celery`` and a call to ``djcelery.setup_loader()``,
+just add ``mixpanel`` to your list of ``INSTALLED_APPS``.
+
 
 Usage
 =====
