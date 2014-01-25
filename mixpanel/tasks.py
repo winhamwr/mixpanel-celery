@@ -44,6 +44,10 @@ class EventTracker(Task):
         Mixpanel servers.
         """
         l = self.get_logger(**kwargs)
+        if mp_settings.MIXPANEL_DISABLE:
+            l.info("Mixpanel disabled; not recording event: <%s>" % event_name)
+            return False
+
         l.info("Recording event: <%s>" % event_name)
 
         # Celery 3.x changed the way the logger could be accessed

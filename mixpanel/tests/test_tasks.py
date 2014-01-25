@@ -30,6 +30,17 @@ class EventTrackerTest(unittest.TestCase):
         mp_settings.MIXPANEL_API_SERVER = 'api.mixpanel.com'
         mp_settings.MIXPANEL_TRACKING_ENDPOINT = '/track/'
         mp_settings.MIXPANEL_TEST_ONLY = True
+        mp_settings.MIXPANEL_DISABLE = False
+
+    def test_disable(self):
+        et = EventTracker()
+        mp_settings.MIXPANEL_DISABLE = True
+
+        def _fake_get_connection():
+            assert False, "Should bail out before trying to get a connection."
+        et._get_connection = _fake_get_connection
+
+        et('foo')
 
     def test_handle_properties_w_token(self):
         et = EventTracker()
