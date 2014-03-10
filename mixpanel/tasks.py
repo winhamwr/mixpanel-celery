@@ -219,11 +219,14 @@ class PeopleTracker(EventTracker):
             '$token': properties['token'],
             '$distinct_id': properties['distinct_id'],
         }
+        if 'ignore_time' in properties:
+            params['$ignore_time'] = properties['ignore_time']
+
         if event == 'track_charge':
             time = properties.get('time', datetime.datetime.now().isoformat())
             transactions = dict(
                 (k, v) for (k, v) in properties.iteritems()
-                if not k in ('token', 'distinct_id', 'amount')
+                if not k in ('token', 'distinct_id', 'ignore_time', 'amount')
             )
 
             transactions['$time'] = time
@@ -235,7 +238,7 @@ class PeopleTracker(EventTracker):
             # rest for passing with $set and $increment
             params[mp_key] = dict(
                 (k, v) for (k, v) in properties.iteritems()
-                if not k in ('token', 'distinct_id')
+                if not k in ('token', 'distinct_id', 'ignore_time')
             )
 
         return self._encode_params(params, is_test)

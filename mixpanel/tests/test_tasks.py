@@ -121,6 +121,31 @@ class EventTrackerTest(unittest.TestCase):
 
         self.assertEqual(expected_params, parsed)
 
+    def test_build_people_track_ignore_time(self):
+        et = PeopleTracker()
+        event = 'set'
+        is_test = 1
+        properties = {'stuff': 'thing', 'blue': 'green',
+                      'distinct_id': 'test_id', 'token': 'testtoken',
+                      'ignore_time': True}
+
+        expected = {
+            '$distinct_id': 'test_id',
+            '$ignore_time': True,
+            '$set': {
+                'stuff': 'thing',
+                'blue': 'green',
+            },
+            '$token': 'testtoken',
+        }
+        url_params = et._build_params(event, properties, is_test)
+        expected_params = urllib.urlencode({
+            'data': base64.b64encode(simplejson.dumps(expected)),
+            'test': is_test,
+        })
+
+        self.assertEqual(expected_params, url_params)
+
     def test_build_people_set_params(self):
         et = PeopleTracker()
         event = 'set'
