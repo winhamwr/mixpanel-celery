@@ -31,6 +31,14 @@ MIXPANEL_API_TOKEN = getattr(settings, 'MIXPANEL_API_TOKEN', None)
 MIXPANEL_RETRY_DELAY = getattr(settings, 'MIXPANEL_RETRY_DELAY', 60*5)
 
 """
+.. data:: MIXPANEL_DISABLE
+
+    Set to ``True`` to disable mixpanel-celery; no events will be sent to
+    Mixpanel.
+"""
+MIXPANEL_DISABLE = getattr(settings, 'MIXPANEL_DISABLE', False)
+
+"""
 .. data:: MIXPANEL_MAX_RETRIES
 
     Number of retry attempts to make before raising an exception.
