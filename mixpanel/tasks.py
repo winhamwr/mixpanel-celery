@@ -102,7 +102,7 @@ class EventTracker(Task):
         Uses ``:mod:mixpanel.conf.settings.MIXPANEL_TEST_ONLY`` as the default
         if no explicit test option is given.
         """
-        if test == None:
+        if test is None:
             test = mp_settings.MIXPANEL_TEST_ONLY
 
         if test:
@@ -113,7 +113,7 @@ class EventTracker(Task):
         """
         Build a properties dictionary, accounting for the token.
         """
-        if properties == None:
+        if properties is None:
             properties = {}
 
         if not properties.get('token', None):
