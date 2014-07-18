@@ -28,9 +28,7 @@ class EventTracker(Task):
         code.
         """
 
-    def run(
-        self, event_name, properties=None, token=None, test=None, **kwargs
-    ):
+    def run(self, event_name, properties=None, token=None, test=None, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -188,11 +186,9 @@ class PeopleTracker(EventTracker):
         'track_charge': '$append',
     }
 
-    def run(
-        self, event_name, properties=None, token=None, test=None, **kwargs
-    ):
+    def run(self, event_name, properties=None, token=None, test=None, **kwargs):
         """
-        Track an People event occurrence to mixpanel through the API.
+        Track a People event occurrence to mixpanel through the API.
 
         ``event_name`` is one of the following strings: set, add, track_charge
         ``properties`` a dictionary of key/value pairs to pass to Mixpanel.
@@ -260,9 +256,7 @@ class FunnelEventTracker(EventTracker):
         """Required properties were missing from the funnel-tracking call"""
         pass
 
-    def run(
-        self, funnel, step, goal, properties, token=None, test=None, **kwargs
-    ):
+    def run(self, funnel, step, goal, properties, token=None, test=None, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
