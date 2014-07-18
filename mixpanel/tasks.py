@@ -116,10 +116,7 @@ class EventTracker(Task):
         if properties is None:
             properties = {}
 
-        if not properties.get('token', None):
-            if token is None:
-                token = mp_settings.MIXPANEL_API_TOKEN
-            properties['token'] = token
+        properties.setdefault('token', token or mp_settings.MIXPANEL_API_TOKEN)
 
         l = self.get_logger()
         l.debug('pre-encoded properties: <%s>' % repr(properties))
