@@ -138,6 +138,55 @@ class EventTrackerTest(TasksTestCase):
 
         self.assertEqual(expected_params, url_params)
 
+    def test_run_properties_None(self):
+        result = EventTracker().run('event_foo', None)
+        self.assertTrue(result)
+        self.assertParams({
+            'event': 'event_foo',
+            'properties': {'token': 'testtesttest'}
+        })
+
+    def test_run_properties_empty(self):
+        result = EventTracker().run('event_foo', {})
+        self.assertTrue(result)
+        self.assertParams({
+            'event': 'event_foo',
+            'properties': {'token': 'testtesttest'}
+        })
+
+    def test_run_properties_foo(self):
+        result = EventTracker().run('event_foo', {'foo': 'bar'})
+        self.assertTrue(result)
+        self.assertParams({
+            'event': 'event_foo',
+            'properties': {
+                'token': 'testtesttest',
+                'foo': 'bar',
+            }
+        })
+
+    def test_non_recorded(self):
+        """non-recorded events should return False"""
+        self.response.read.return_value = '0'
+
+        et = EventTracker()
+        # Times older than 3 hours don't get recorded according to:
+        # http://mixpanel.com/api/docs/specification
+        # requests will be rejected that are 3 hours older than present time
+        # (though actually this is returnin False because of mocking network)
+        result = et.run('event_foo', {'time': 1245613885})
+
+        self.assertFalse(result)
+
+    def test_debug_logger(self):
+        et = EventTracker()
+        result = et.run('event_foo', {}, loglevel=logging.DEBUG)
+
+        self.assertTrue(result)
+
+
+class PeopleTrackerTest(TasksTestCase):
+
     @patch('mixpanel.tasks.datetime.datetime', FakeDateTime)
     def test_build_people_track_charge_params(self):
         self.maxDiff = None
@@ -216,52 +265,6 @@ class EventTrackerTest(TasksTestCase):
         })
 
         self.assertEqual(expected_params, url_params)
-
-    def test_run_properties_None(self):
-        result = EventTracker().run('event_foo', None)
-        self.assertTrue(result)
-        self.assertParams({
-            'event': 'event_foo',
-            'properties': {'token': 'testtesttest'}
-        })
-
-    def test_run_properties_empty(self):
-        result = EventTracker().run('event_foo', {})
-        self.assertTrue(result)
-        self.assertParams({
-            'event': 'event_foo',
-            'properties': {'token': 'testtesttest'}
-        })
-
-    def test_run_properties_foo(self):
-        result = EventTracker().run('event_foo', {'foo': 'bar'})
-        self.assertTrue(result)
-        self.assertParams({
-            'event': 'event_foo',
-            'properties': {
-                'token': 'testtesttest',
-                'foo': 'bar',
-            }
-        })
-
-    def test_non_recorded(self):
-        """non-recorded events should return False"""
-        self.response.read.return_value = '0'
-
-        et = EventTracker()
-        # Times older than 3 hours don't get recorded according to:
-        # http://mixpanel.com/api/docs/specification
-        # requests will be rejected that are 3 hours older than present time
-        # (though actually this is returnin False because of mocking network)
-        result = et.run('event_foo', {'time': 1245613885})
-
-        self.assertFalse(result)
-
-    def test_debug_logger(self):
-        et = EventTracker()
-        result = et.run('event_foo', {}, loglevel=logging.DEBUG)
-
-        self.assertTrue(result)
 
 
 class BrokenRequestsTest(TasksTestCase):
