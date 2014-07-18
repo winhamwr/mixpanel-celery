@@ -1,11 +1,12 @@
 import base64
 import logging
+import socket
 import unittest
 import urllib
 import urlparse
 from datetime import datetime
 
-import mock
+from mock import patch, MagicMock as Mock
 try:
     from celery.tests.utils import eager_tasks
 except ImportError:
@@ -24,13 +25,39 @@ class FakeDateTime(datetime):
         return datetime.__new__(datetime, *args, **kwargs)
 
 
-class EventTrackerTest(unittest.TestCase):
+class TasksTestCase(unittest.TestCase):
+
     def setUp(self):
+        super(TasksTestCase, self).setUp()
+        self.patch_network()
+        self.set_mp_settings()
+
+    def tearDown(self):
+        self.unpatch_network()
+        super(TasksTestCase, self).tearDown()
+
+    def set_mp_settings(self):
         mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
         mp_settings.MIXPANEL_API_SERVER = 'api.mixpanel.com'
         mp_settings.MIXPANEL_TRACKING_ENDPOINT = '/track/'
         mp_settings.MIXPANEL_TEST_PRIORITY = True
         mp_settings.MIXPANEL_DISABLE = False
+
+    def patch_network(self):
+        self.old_get_connection = EventTracker._get_connection
+        self.conn = Mock()
+        EventTracker._get_connection = lambda task: self.conn
+        self.response = Mock()
+        self.conn.getresponse.return_value = self.response
+        self.response.status = 200
+        self.response.reason = 'OK'
+        self.response.read.return_value = '1'
+
+    def unpatch_network(self):
+        EventTracker._get_connection = self.old_get_connection
+
+
+class EventTrackerTest(TasksTestCase):
 
     def test_disable(self):
         et = EventTracker()
@@ -100,7 +127,7 @@ class EventTrackerTest(unittest.TestCase):
 
         self.assertEqual(expected_params, url_params)
 
-    @mock.patch('mixpanel.tasks.datetime.datetime', FakeDateTime)
+    @patch('mixpanel.tasks.datetime.datetime', FakeDateTime)
     def test_build_people_track_charge_params(self):
         self.maxDiff = None
         et = PeopleTracker()
@@ -186,12 +213,15 @@ class EventTrackerTest(unittest.TestCase):
 
         self.assertTrue(result)
 
-    def test_old_run(self):
+    def test_non_recorded(self):
         """non-recorded events should return False"""
+        self.response.read.return_value = '0'
+
         et = EventTracker()
         # Times older than 3 hours don't get recorded according to:
         # http://mixpanel.com/api/docs/specification
         # requests will be rejected that are 3 hours older than present time
+        # (though actually this is returnin False because of mocking network)
         result = et.run('event_foo', {'time': 1245613885})
 
         self.assertFalse(result)
@@ -203,40 +233,22 @@ class EventTrackerTest(unittest.TestCase):
         self.assertTrue(result)
 
 
-class BrokenRequestsTest(unittest.TestCase):
-
-    def setUp(self):
-        mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
-        mp_settings.MIXPANEL_TEST_PRIORITY = True
-        mp_settings.MIXPANEL_API_SERVER = 'api.mixpanel.com'
-        mp_settings.MIXPANEL_TRACKING_ENDPOINT = '/track/'
-        EventTracker.endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
-
-    def tearDown(self):
-        EventTracker.endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
+class BrokenRequestsTest(TasksTestCase):
 
     def test_failed_request(self):
-        EventTracker.endpoint = 'brokenurl'
-
+        self.response.status = 400
         with eager_tasks():
             result = EventTracker.delay('event_foo')
-
         self.assertNotEqual(result.traceback, None)
 
     def test_failed_socket_request(self):
-        mp_settings.MIXPANEL_API_SERVER = '127.0.0.1:60000'
-
+        self.response.read = Mock(side_effect=socket.error('BOOM'))
         with eager_tasks():
             result = EventTracker.delay('event_foo')
         self.assertNotEqual(result.traceback, None)
 
 
 class FunnelEventTrackerTest(unittest.TestCase):
-    def setUp(self):
-        mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
-        mp_settings.MIXPANEL_API_SERVER = 'api.mixpanel.com'
-        mp_settings.MIXPANEL_TRACKING_ENDPOINT = '/track/'
-        mp_settings.MIXPANEL_TEST_PRIORITY = True
 
     def test_afp_validation(self):
         fet = FunnelEventTracker()
