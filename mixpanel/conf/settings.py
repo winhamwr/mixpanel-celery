@@ -107,9 +107,11 @@ MIXPANEL_FUNNEL_EVENT_ID = getattr(settings, 'MIXPANEL_FUNNEL_EVENT_ID',
                                'mp_funnel')
 
 """
-.. data:: MIXPANEL_TEST_ONLY
+.. data:: MIXPANEL_TEST_PRIORITY
 
     If this value is True, then events will be sent to Mixpanel with the property
-    test = 1 so that no events will actually be logged.
+    test = 1 which uses a special high-priority queue.
+
+    http://blog.mixpanel.com/2010/04/22/a-way-to-ease-your-integration-with-mixpanel-while-were-working/
 """
-MIXPANEL_TEST_ONLY = getattr(settings, 'MIXPANEL_TEST_ONLY', False)
+MIXPANEL_TEST_PRIORITY = getattr(settings, 'MIXPANEL_TEST_PRIORITY', False)

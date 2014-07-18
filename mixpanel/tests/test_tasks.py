@@ -29,7 +29,7 @@ class EventTrackerTest(unittest.TestCase):
         mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
         mp_settings.MIXPANEL_API_SERVER = 'api.mixpanel.com'
         mp_settings.MIXPANEL_TRACKING_ENDPOINT = '/track/'
-        mp_settings.MIXPANEL_TEST_ONLY = True
+        mp_settings.MIXPANEL_TEST_PRIORITY = True
         mp_settings.MIXPANEL_DISABLE = False
 
     def test_disable(self):
@@ -78,7 +78,7 @@ class EventTrackerTest(unittest.TestCase):
         self.assertEqual(et._is_test(False), 0)
         self.assertEqual(et._is_test(True), 1)
 
-        mp_settings.MIXPANEL_TEST_ONLY = False
+        mp_settings.MIXPANEL_TEST_PRIORITY = False
         self.assertEqual(et._is_test(None), 0)
         self.assertEqual(et._is_test(False), 0)
         self.assertEqual(et._is_test(True), 1)
@@ -207,7 +207,7 @@ class BrokenRequestsTest(unittest.TestCase):
 
     def setUp(self):
         mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
-        mp_settings.MIXPANEL_TEST_ONLY = True
+        mp_settings.MIXPANEL_TEST_PRIORITY = True
         mp_settings.MIXPANEL_API_SERVER = 'api.mixpanel.com'
         mp_settings.MIXPANEL_TRACKING_ENDPOINT = '/track/'
         EventTracker.endpoint = mp_settings.MIXPANEL_TRACKING_ENDPOINT
@@ -236,7 +236,7 @@ class FunnelEventTrackerTest(unittest.TestCase):
         mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
         mp_settings.MIXPANEL_API_SERVER = 'api.mixpanel.com'
         mp_settings.MIXPANEL_TRACKING_ENDPOINT = '/track/'
-        mp_settings.MIXPANEL_TEST_ONLY = True
+        mp_settings.MIXPANEL_TEST_PRIORITY = True
 
     def test_afp_validation(self):
         fet = FunnelEventTracker()
