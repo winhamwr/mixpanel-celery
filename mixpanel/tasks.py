@@ -39,9 +39,9 @@ class EventTracker(Task):
         ``token`` is (optionally) your Mixpanel api token. Not required if
         you've already configured your MIXPANEL_API_TOKEN setting.
         ``test`` is an optional override to your
-        `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for
-        determining if the event requests should actually be stored on the
-        Mixpanel servers.
+        `:data:mixpanel.conf.settings.MIXPANEL_TEST_PRIORITY` setting for
+        putting the events on a high-priority queue at Mixpanel for testing
+        purposes.
         """
         l = self.get_logger(**kwargs)
         if mp_settings.MIXPANEL_DISABLE:
@@ -61,13 +61,12 @@ class EventTracker(Task):
         if effective_level == logging.DEBUG:
             httplib.HTTPConnection.debuglevel = 1
 
-        is_test = self._is_test(test)
         generated_properties = self._handle_properties(properties, token)
 
         url_params = self._build_params(
             event_name,
             generated_properties,
-            is_test,
+            self._is_test(test),
         )
         l.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
@@ -93,19 +92,19 @@ class EventTracker(Task):
     def _is_test(self, test):
         """
         Determine whether this event should be logged as a test request,
-        meaning it won't actually be stored on the Mixpanel servers. A return
-        result of 1 means this will be a test, 0 means it won't as per the API
-        spec.
+        meaning that it goes on a high-priority queue on the Mixpanel servers.
+        (This is different from the old meaning of "test" which meant that
+        Mixpanel didn't store the event at all.)
 
-        Uses ``:mod:mixpanel.conf.settings.MIXPANEL_TEST_ONLY`` as the default
-        if no explicit test option is given.
+        A return result of 1 means this will be a test, 0 means it won't as per
+        the API spec.
+
+        Uses ``:mod:mixpanel.conf.settings.MIXPANEL_TEST_PRIORITY`` as the
+        default if no explicit test option is given.
         """
         if test is None:
-            test = mp_settings.MIXPANEL_TEST_ONLY
-
-        if test:
-            return 1
-        return 0
+            test = mp_settings.MIXPANEL_TEST_PRIORITY
+        return 1 if test else 0
 
     def _handle_properties(self, properties, token):
         """
@@ -197,9 +196,9 @@ class PeopleTracker(EventTracker):
         ``token`` is (optionally) your Mixpanel api token. Not required if
         you've already configured your MIXPANEL_API_TOKEN setting.
         ``test`` is an optional override to your
-        `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for
-        determining if the event requests should actually be stored on the
-        Mixpanel servers.
+        `:data:mixpanel.conf.settings.MIXPANEL_TEST_PRIORITY` setting for
+        putting the events on a high-priority queue at Mixpanel for testing
+        purposes.
         """
         return super(PeopleTracker, self).run(
             event_name,
@@ -269,15 +268,14 @@ class FunnelEventTracker(EventTracker):
         ``token`` is (optionally) your Mixpanel api token. Not required if
         you've already configured your MIXPANEL_API_TOKEN setting.
         ``test`` is an optional override to your
-        `:data:mixpanel.conf.settings.MIXPANEL_TEST_ONLY` setting for
-        determining if the event requests should actually be stored on the
-        Mixpanel servers.
+        `:data:mixpanel.conf.settings.MIXPANEL_TEST_PRIORITY` setting for
+        putting the events on a high-priority queue at Mixpanel for testing
+        purposes.
         """
         l = self.get_logger(**kwargs)
         l.info("Recording funnel: <%s>-<%s>" % (funnel, step))
         properties = self._handle_properties(properties, token)
 
-        is_test = self._is_test(test)
         properties = self._add_funnel_properties(
             properties,
             funnel,
@@ -288,7 +286,7 @@ class FunnelEventTracker(EventTracker):
         url_params = self._build_params(
             mp_settings.MIXPANEL_FUNNEL_EVENT_ID,
             properties,
-            is_test,
+            self._is_test(test),
         )
         l.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
