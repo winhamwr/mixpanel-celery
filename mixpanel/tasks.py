@@ -1,3 +1,5 @@
+from __future__ import absolute_import, unicode_literals
+
 import base64
 import datetime
 import httplib
@@ -9,7 +11,7 @@ import urllib
 from celery.task import Task
 from celery.registry import tasks
 
-from mixpanel.conf import settings as mp_settings
+from .conf import settings as mp_settings
 
 
 class EventTracker(Task):
@@ -26,9 +28,7 @@ class EventTracker(Task):
         code.
         """
 
-    def run(
-        self, event_name, properties=None, token=None, test=None, **kwargs
-    ):
+    def run(self, event_name, properties=None, token=None, test=None, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -100,7 +100,7 @@ class EventTracker(Task):
         Uses ``:mod:mixpanel.conf.settings.MIXPANEL_TEST_ONLY`` as the default
         if no explicit test option is given.
         """
-        if test == None:
+        if test is None:
             test = mp_settings.MIXPANEL_TEST_ONLY
 
         if test:
@@ -111,13 +111,10 @@ class EventTracker(Task):
         """
         Build a properties dictionary, accounting for the token.
         """
-        if properties == None:
+        if properties is None:
             properties = {}
 
-        if not properties.get('token', None):
-            if token is None:
-                token = mp_settings.MIXPANEL_API_TOKEN
-            properties['token'] = token
+        properties.setdefault('token', token or mp_settings.MIXPANEL_API_TOKEN)
 
         l = self.get_logger()
         l.debug('pre-encoded properties: <%s>' % repr(properties))
@@ -189,11 +186,9 @@ class PeopleTracker(EventTracker):
         'track_charge': '$append',
     }
 
-    def run(
-        self, event_name, properties=None, token=None, test=None, **kwargs
-    ):
+    def run(self, event_name, properties=None, token=None, test=None, **kwargs):
         """
-        Track an People event occurrence to mixpanel through the API.
+        Track a People event occurrence to mixpanel through the API.
 
         ``event_name`` is one of the following strings: set, add, track_charge
         ``properties`` a dictionary of key/value pairs to pass to Mixpanel.
@@ -261,9 +256,7 @@ class FunnelEventTracker(EventTracker):
         """Required properties were missing from the funnel-tracking call"""
         pass
 
-    def run(
-        self, funnel, step, goal, properties, token=None, test=None, **kwargs
-    ):
+    def run(self, funnel, step, goal, properties, token=None, test=None, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
