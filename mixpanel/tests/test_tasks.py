@@ -282,7 +282,7 @@ class BrokenRequestsTest(TasksTestCase):
         self.assertNotEqual(result.traceback, None)
 
 
-class FunnelEventTrackerTest(unittest.TestCase):
+class FunnelEventTrackerTest(TasksTestCase):
 
     def test_afp_validation(self):
         fet = FunnelEventTracker()
