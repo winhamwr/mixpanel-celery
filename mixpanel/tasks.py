@@ -1,3 +1,5 @@
+from __future__ import absolute_import, unicode_literals
+
 import base64
 import datetime
 import httplib
@@ -9,7 +11,7 @@ import urllib
 from celery.task import Task
 from celery.registry import tasks
 
-from mixpanel.conf import settings as mp_settings
+from .conf import settings as mp_settings
 
 
 class EventTracker(Task):
