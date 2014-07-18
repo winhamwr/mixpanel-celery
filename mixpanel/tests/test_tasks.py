@@ -1,4 +1,7 @@
+from __future__ import absolute_import, unicode_literals
+
 import base64
+import json
 import logging
 import socket
 import unittest
@@ -6,7 +9,7 @@ import urllib
 import urlparse
 from datetime import datetime
 
-from mock import patch, MagicMock as Mock
+from mock import call, patch, MagicMock as Mock
 try:
     from celery.tests.utils import eager_tasks
 except ImportError:
@@ -55,6 +58,14 @@ class TasksTestCase(unittest.TestCase):
 
     def unpatch_network(self):
         EventTracker._get_connection = self.old_get_connection
+
+    def assertParams(self, expected):
+        args = self.conn.request.call_args[0]
+        self.assertEqual(args[0], 'GET')
+        path, qs = args[1].split('?', 1)
+        parsed = urlparse.parse_qs(qs, keep_blank_values=True, strict_parsing=True)
+        params = json.loads(base64.b64decode(parsed['data'][0]))
+        self.assertEqual(params, expected)
 
 
 class EventTrackerTest(TasksTestCase):
@@ -206,12 +217,32 @@ class EventTrackerTest(TasksTestCase):
 
         self.assertEqual(expected_params, url_params)
 
-    def test_run(self):
-        # "correct" result obtained from: http://mixpanel.com/api/docs/console
-        et = EventTracker()
-        result = et.run('event_foo', {})
-
+    def test_run_properties_None(self):
+        result = EventTracker().run('event_foo', None)
         self.assertTrue(result)
+        self.assertParams({
+            'event': 'event_foo',
+            'properties': {'token': 'testtesttest'}
+        })
+
+    def test_run_properties_empty(self):
+        result = EventTracker().run('event_foo', {})
+        self.assertTrue(result)
+        self.assertParams({
+            'event': 'event_foo',
+            'properties': {'token': 'testtesttest'}
+        })
+
+    def test_run_properties_foo(self):
+        result = EventTracker().run('event_foo', {'foo': 'bar'})
+        self.assertTrue(result)
+        self.assertParams({
+            'event': 'event_foo',
+            'properties': {
+                'token': 'testtesttest',
+                'foo': 'bar',
+            }
+        })
 
     def test_non_recorded(self):
         """non-recorded events should return False"""
