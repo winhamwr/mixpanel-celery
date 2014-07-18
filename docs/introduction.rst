@@ -206,6 +206,30 @@ the mixpanel distinct id of 1. To increment profile property values using the
     )
     result.wait()
 
+Since some tasks are done separate from user interaction when updating their
+associated Person in mixpanel, you can set the ``$ignore_time`` special
+property by setting ``'ignore_time'`` to ``True`` in the ``properties``
+dictionary:
+
+.. code-block:: python
+
+    from mixpanel.tasks import PeopleTracker
+
+    result = PeopleTracker.delay(
+        'set',
+        {
+            'distinct_id': 1,
+            'Plan': 'Premium',
+            'ignore_time': True,
+        },
+        token='YOUR_API_TOKEN',
+    )
+    result.wait()
+
+This bypasses the automatic re-setting of the "Last Seen" date property on the
+Person as described in `Mixpanel's People HTTP Specification
+<https://mixpanel.com/docs/people-analytics/people-http-specification-insert-data>`__.
+
 You can also track charges using the ``track_charge`` event:
 
 .. code-block:: python
