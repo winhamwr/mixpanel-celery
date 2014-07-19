@@ -15,6 +15,12 @@ PeopleTracker also accepts kwargs for distinct_id, ignore_time, time and
 ip. Thanks to Spencer Ellinor for the original pull request #27 to add
 ignore_time.
 
+MIXPANEL_DISABLE
+~~~~~~~~~~~~~~~~
+
+There's a new setting ``MIXPANEL_DISABLE`` to disable sending events to
+Mixpanel, thanks to Carl Meyer.
+
 MIXPANEL_TEST_PRIORITY
 ~~~~~~~~~~~~~~~~~~~~~~
 
