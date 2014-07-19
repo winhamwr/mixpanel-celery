@@ -41,7 +41,6 @@ class TasksTestCase(unittest.TestCase):
         mp_settings.MIXPANEL_API_TOKEN = 'testtesttest'
         mp_settings.MIXPANEL_API_SERVER = 'api.mixpanel.com'
         mp_settings.MIXPANEL_TRACKING_ENDPOINT = '/track/'
-        mp_settings.MIXPANEL_TEST_PRIORITY = True
         mp_settings.MIXPANEL_DISABLE = False
 
     def patch_network(self):
@@ -57,11 +56,14 @@ class TasksTestCase(unittest.TestCase):
     def unpatch_network(self):
         EventTracker._get_connection = self.old_get_connection
 
-    def assertParams(self, expected):
+    def get_querystring_dict(self):
         args = self.conn.request.call_args[0]
         self.assertEqual(args[0], 'GET')
         path, qs = args[1].split('?', 1)
-        parsed = dict(urlparse.parse_qsl(qs, keep_blank_values=True))
+        return dict(urlparse.parse_qsl(qs, keep_blank_values=True))
+
+    def assertParams(self, expected):
+        parsed = self.get_querystring_dict()
         params = json.loads(base64.b64decode(parsed['data']))
         self.assertEqual(params, expected)
 
@@ -78,31 +80,50 @@ class EventTrackerTest(TasksTestCase):
 
         et('foo')
 
-    def test_is_test(self):
-        et = EventTracker()
+    def test_run_priority_default_true(self):
+        mp_settings.MIXPANEL_TEST_PRIORITY = True
+        result = EventTracker().run('event_foo')
+        self.assertTrue(result)
+        query = self.get_querystring_dict()
+        self.assertIn('test', query)
+        self.assertEqual(query['test'], '1')
 
-        self.assertEqual(et._is_test(None), 1)
-        self.assertEqual(et._is_test(False), 0)
-        self.assertEqual(et._is_test(True), 1)
-
+    def test_run_priority_default_false(self):
         mp_settings.MIXPANEL_TEST_PRIORITY = False
-        self.assertEqual(et._is_test(None), 0)
-        self.assertEqual(et._is_test(False), 0)
-        self.assertEqual(et._is_test(True), 1)
+        result = EventTracker().run('event_foo')
+        self.assertTrue(result)
+        query = self.get_querystring_dict()
+        self.assertNotIn('test', query)
 
-    def test_build_params(self):
+    def test_run_priority_true(self):
+        mp_settings.MIXPANEL_TEST_PRIORITY = False
+        result = EventTracker().run('event_foo', test=True)
+        self.assertTrue(result)
+        query = self.get_querystring_dict()
+        self.assertIn('test', query)
+        self.assertEqual(query['test'], '1')
+
+    def test_run_priority_false(self):
+        mp_settings.MIXPANEL_TEST_PRIORITY = True
+        result = EventTracker().run('event_foo', test=False)
+        self.assertTrue(result)
+        query = self.get_querystring_dict()
+        self.assertNotIn('test', query)
+
+    def test_build_and_encode_params(self):
         et = EventTracker()
 
         event = 'foo_event'
-        is_test = 1
+        test = True
         properties = {'token': 'testtoken'}
         params = {'event': event, 'properties': properties}
 
-        url_params = et._build_params(event, properties, is_test)
+        params = et._build_params(event, properties)
+        url_params = et._encode_params(params, test)
 
         expected_params = urllib.urlencode({
             'data': base64.b64encode(json.dumps(params)),
-            'test': is_test,
+            'test': '1'
         })
 
         self.assertEqual(expected_params, url_params)
@@ -171,9 +192,9 @@ class PeopleTrackerTest(TasksTestCase):
         now = datetime.now()
         FakeDateTime.now = classmethod(lambda cls: now)
         event = 'track_charge'
-        is_test = 1
         properties = {'amount': 11.77, 'distinct_id': 'test_id',
                       'extra': 'extra'}
+        params = et._build_params(event, properties, token='testtoken')
         expected = {
             '$append': {
                 '$transactions': {
@@ -185,25 +206,15 @@ class PeopleTrackerTest(TasksTestCase):
             '$distinct_id': 'test_id',
             '$token': 'testtoken',
         }
-        url_params = et._build_params(event, properties, is_test,
-                                      token='testtoken')
-        parsed = dict(urlparse.parse_qsl(url_params, True))
-        parsed['data'] = json.loads(base64.b64decode(parsed['data']))
-
-        expected_params = {
-            'data': expected,
-            'test': unicode(is_test),
-        }
-
-        self.assertEqual(expected_params, parsed)
+        self.assertEqual(params, expected)
 
     def test_build_people_track_ignore_time(self):
         et = PeopleTracker()
         event = 'set'
-        is_test = 1
         properties = {'stuff': 'thing', 'blue': 'green',
-                      'distinct_id': 'test_id', 'ignore_time': True}
-
+                      'distinct_id': 'test_id'}
+        params = et._build_params(event, properties, token='testtoken',
+                                  ignore_time=True)
         expected = {
             '$distinct_id': 'test_id',
             '$ignore_time': True,
@@ -213,21 +224,14 @@ class PeopleTrackerTest(TasksTestCase):
             },
             '$token': 'testtoken',
         }
-        url_params = et._build_params(event, properties, is_test,
-                                      token='testtoken')
-        expected_params = urllib.urlencode({
-            'data': base64.b64encode(json.dumps(expected)),
-            'test': is_test,
-        })
-
-        self.assertEqual(expected_params, url_params)
+        self.assertEqual(params, expected)
 
     def test_build_people_set_params(self):
         et = PeopleTracker()
         event = 'set'
-        is_test = 1
         properties = {'stuff': 'thing', 'blue': 'green',
                       'distinct_id': 'test_id'}
+        params = et._build_params(event, properties, token='testtoken')
         expected = {
             '$distinct_id': 'test_id',
             '$set': {
@@ -236,14 +240,7 @@ class PeopleTrackerTest(TasksTestCase):
             },
             '$token': 'testtoken',
         }
-        url_params = et._build_params(event, properties, is_test,
-                                      token='testtoken')
-        expected_params = urllib.urlencode({
-            'data': base64.b64encode(json.dumps(expected)),
-            'test': is_test,
-        })
-
-        self.assertEqual(expected_params, url_params)
+        self.assertEqual(params, expected)
 
     def test_run_set(self):
         result = PeopleTracker().run('set', {
