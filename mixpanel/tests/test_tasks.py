@@ -163,6 +163,14 @@ class EventTrackerTest(TasksTestCase):
             }
         })
 
+    def test_run_token(self):
+        result = EventTracker().run('event_foo', token='xxx')
+        self.assertTrue(result)
+        self.assertParams({
+            'event': 'event_foo',
+            'properties': {'token': 'xxx'}
+        })
+
     def test_non_recorded(self):
         """non-recorded events should return False"""
         self.response.read.return_value = '0'
@@ -264,6 +272,18 @@ class PeopleTrackerTest(TasksTestCase):
 
         self.assertEqual(expected_params, url_params)
 
+    def test_run_set(self):
+        result = PeopleTracker().run('set', {
+            'distinct_id': 'x',
+            'foo': 'bar',
+        })
+        self.assertTrue(result)
+        self.assertParams({
+            '$distinct_id': 'x',
+            '$token': 'testtesttest',
+            '$set': {'foo': 'bar'},
+        })
+
 
 class BrokenRequestsTest(TasksTestCase):
 
@@ -335,3 +355,12 @@ class FunnelEventTrackerTest(TasksTestCase):
         result = fet.run(funnel, step, goal, {'distinct_id': 'test_user'})
 
         self.assertTrue(result)
+        self.assertParams({
+            'event': 'mp_funnel',
+            'properties': {
+                'distinct_id': 'test_user',
+                'funnel': 'test_funnel',
+                'goal': 'test_goal',
+                'step': 'test_step',
+                'token': 'testtesttest'}
+        })
