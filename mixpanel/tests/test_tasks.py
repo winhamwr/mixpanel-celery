@@ -61,8 +61,8 @@ class TasksTestCase(unittest.TestCase):
         args = self.conn.request.call_args[0]
         self.assertEqual(args[0], 'GET')
         path, qs = args[1].split('?', 1)
-        parsed = urlparse.parse_qs(qs, keep_blank_values=True, strict_parsing=True)
-        params = json.loads(base64.b64decode(parsed['data'][0]))
+        parsed = dict(urlparse.parse_qsl(qs, keep_blank_values=True))
+        params = json.loads(base64.b64decode(parsed['data']))
         self.assertEqual(params, expected)
 
 
