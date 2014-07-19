@@ -85,7 +85,7 @@ class EventTrackerTest(TasksTestCase):
         result = EventTracker().run('event_foo')
         self.assertTrue(result)
         query = self.get_querystring_dict()
-        self.assertIn('test', query)
+        assert 'test' in query
         self.assertEqual(query['test'], '1')
 
     def test_run_priority_default_false(self):
@@ -93,14 +93,14 @@ class EventTrackerTest(TasksTestCase):
         result = EventTracker().run('event_foo')
         self.assertTrue(result)
         query = self.get_querystring_dict()
-        self.assertNotIn('test', query)
+        assert 'test' not in query
 
     def test_run_priority_true(self):
         mp_settings.MIXPANEL_TEST_PRIORITY = False
         result = EventTracker().run('event_foo', test=True)
         self.assertTrue(result)
         query = self.get_querystring_dict()
-        self.assertIn('test', query)
+        assert 'test' in query
         self.assertEqual(query['test'], '1')
 
     def test_run_priority_false(self):
@@ -108,7 +108,7 @@ class EventTrackerTest(TasksTestCase):
         result = EventTracker().run('event_foo', test=False)
         self.assertTrue(result)
         query = self.get_querystring_dict()
-        self.assertNotIn('test', query)
+        assert 'test' not in query
 
     def test_build_and_encode_params(self):
         et = EventTracker()
