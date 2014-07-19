@@ -1,6 +1,37 @@
 Changelog
 =========
 
+0.8.0
+-----
+
+PeopleTracker features
+~~~~~~~~~~~~~~~~~~~~~~
+
+PeopleTracker now supports all the operations: add, append, delete, set,
+set_once, union, unset; plus track_charge which provides the same
+functionality as the JS API.
+
+PeopleTracker also accepts kwargs for distinct_id, ignore_time, time and
+ip. Thanks to Spencer Ellinor for the original pull request #27 to add
+ignore_time.
+
+MIXPANEL_TEST_PRIORITY
+~~~~~~~~~~~~~~~~~~~~~~
+
+Back in 2010 Mixpanel changed the meaning of the ``test`` flag from "don't
+record this event" to "record this event on a high priority queue."  Our
+EventTracker kwarg ``test`` remains as-is (albeit with a different
+meaning), but the corresponding setting changed from ``MIXPANEL_TEST_ONLY``
+to ``MIXPANEL_TEST_PRIORITY`` to reflect its purpose.
+
+Mocked network in tests
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The unit tests used to send network requests to the Mixpanel server. Now
+the network is mocked out, so we're not hitting the network, and even
+better, we can investigate after a test (with ``assertParams``) to verify
+the content of the event as it would have been sent.
+
 0.7.0
 -----
 
