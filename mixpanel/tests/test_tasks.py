@@ -254,6 +254,15 @@ class PeopleTrackerTest(TasksTestCase):
             '$set': {'foo': 'bar'},
         })
 
+    def test_run_unset(self):
+        result = PeopleTracker().run('unset', ['y', 'z'],
+                                     distinct_id='x')
+        self.assertTrue(result)
+        self.assertParams({
+            '$distinct_id': 'x',
+            '$token': 'testtesttest',
+            '$unset': ['y', 'z'],
+        })
 
 class BrokenRequestsTest(TasksTestCase):
 

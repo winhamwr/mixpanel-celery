@@ -154,9 +154,14 @@ tasks.register(EventTracker)
 class PeopleTracker(EventTracker):
     endpoint = mp_settings.MIXPANEL_PEOPLE_ENDPOINT
     event_map = {
-        'set': '$set',
         'add': '$add',
+        'append': '$append',
+        'delete': '$delete',
+        'set': '$set',
+        'set_once': '$set_once',
         'track_charge': '$append',
+        'union': '$union',
+        'unset': '$unset',
     }
     required_params = {
         'token': '$token',
@@ -188,6 +193,11 @@ class PeopleTracker(EventTracker):
         """
         Returns the people profile event format.
         """
+        if event == 'unset':
+            if not isinstance(properties, list):
+                raise ValueError("Properties must be a list for unset.")
+            unset_props, properties = properties, {}
+
         # Avoid overwriting the passed-in properties.
         properties = dict(properties or {})
 
@@ -232,6 +242,9 @@ class PeopleTracker(EventTracker):
 
             # Demote entire properties dict under $transactions.
             params[op_name] = {'$transactions': properties}
+
+        elif event == 'unset':
+            params[op_name] = unset_props
 
         else:
             params[op_name] = properties
