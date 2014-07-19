@@ -258,7 +258,7 @@ class PeopleTrackerTest(TasksTestCase):
         }
         url_params = et._build_params(event, properties, is_test)
         expected_params = urllib.urlencode({
-            'data': base64.b64encode(simplejson.dumps(expected)),
+            'data': base64.b64encode(json.dumps(expected)),
             'test': is_test,
         })
 
