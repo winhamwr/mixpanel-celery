@@ -16,8 +16,6 @@ except ImportError:
     # Celery 3.1 removed the eager_tasks decorator
     from mixpanel.tests.utils import eager_tasks
 
-from django.utils import simplejson
-
 from mixpanel.tasks import EventTracker, PeopleTracker, FunnelEventTracker
 from mixpanel.conf import settings as mp_settings
 
@@ -132,7 +130,7 @@ class EventTrackerTest(TasksTestCase):
         url_params = et._build_params(event, properties, is_test)
 
         expected_params = urllib.urlencode({
-            'data': base64.b64encode(simplejson.dumps(params)),
+            'data': base64.b64encode(json.dumps(params)),
             'test': is_test,
         })
 
@@ -210,7 +208,7 @@ class PeopleTrackerTest(TasksTestCase):
         }
         url_params = et._build_params(event, properties, is_test)
         parsed = dict(urlparse.parse_qsl(url_params, True))
-        parsed[u'data'] = simplejson.loads(base64.b64decode(parsed['data']))
+        parsed['data'] = json.loads(base64.b64decode(parsed['data']))
 
         expected_params = {
             u'data': expected,
@@ -238,7 +236,7 @@ class PeopleTrackerTest(TasksTestCase):
         }
         url_params = et._build_params(event, properties, is_test)
         expected_params = urllib.urlencode({
-            'data': base64.b64encode(simplejson.dumps(expected)),
+            'data': base64.b64encode(json.dumps(expected)),
             'test': is_test,
         })
 
