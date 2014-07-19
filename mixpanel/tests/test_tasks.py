@@ -191,28 +191,28 @@ class PeopleTrackerTest(TasksTestCase):
         et = PeopleTracker()
         now = datetime.now()
         FakeDateTime.now = classmethod(lambda cls: now)
-        event = u'track_charge'
+        event = 'track_charge'
         is_test = 1
-        properties = {u'amount': 11.77, u'distinct_id': u'test_id',
-                      u'token': u'testtoken', u'extra': u'extra'}
+        properties = {'amount': 11.77, 'distinct_id': 'test_id',
+                      'token': 'testtoken', 'extra': 'extra'}
         expected = {
-            u'$append': {
-                u'$transactions': {
-                    u'$amount': 11.77,
-                    u'$time': unicode(now.isoformat()),
-                    u'extra': 'extra'
+            '$append': {
+                '$transactions': {
+                    '$amount': 11.77,
+                    '$time': unicode(now.isoformat()),
+                    'extra': 'extra'
                 }
             },
-            u'$distinct_id': u'test_id',
-            u'$token': u'testtoken',
+            '$distinct_id': 'test_id',
+            '$token': 'testtoken',
         }
         url_params = et._build_params(event, properties, is_test)
         parsed = dict(urlparse.parse_qsl(url_params, True))
         parsed['data'] = json.loads(base64.b64decode(parsed['data']))
 
         expected_params = {
-            u'data': expected,
-            u'test': unicode(is_test),
+            'data': expected,
+            'test': unicode(is_test),
         }
 
         self.assertEqual(expected_params, parsed)
