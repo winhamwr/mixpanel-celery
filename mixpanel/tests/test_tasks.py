@@ -78,35 +78,6 @@ class EventTrackerTest(TasksTestCase):
 
         et('foo')
 
-    def test_handle_properties_w_token(self):
-        et = EventTracker()
-
-        properties = et._handle_properties({}, 'foo')
-        self.assertEqual('foo', properties['token'])
-
-    def test_handle_properties_no_token(self):
-        et = EventTracker()
-        mp_settings.MIXPANEL_API_TOKEN = 'bar'
-
-        properties = et._handle_properties({}, None)
-        self.assertEqual('bar', properties['token'])
-
-    def test_handle_properties_empty(self):
-        et = EventTracker()
-        mp_settings.MIXPANEL_API_TOKEN = 'bar'
-
-        properties = et._handle_properties(None, None)
-        self.assertEqual('bar', properties['token'])
-
-    def test_handle_properties_given(self):
-        et = EventTracker()
-
-        properties = et._handle_properties({'token': 'bar'}, None)
-        self.assertEqual('bar', properties['token'])
-
-        properties = et._handle_properties({'token': 'bar'}, 'foo')
-        self.assertEqual('bar', properties['token'])
-
     def test_is_test(self):
         et = EventTracker()
 
@@ -202,7 +173,7 @@ class PeopleTrackerTest(TasksTestCase):
         event = 'track_charge'
         is_test = 1
         properties = {'amount': 11.77, 'distinct_id': 'test_id',
-                      'token': 'testtoken', 'extra': 'extra'}
+                      'extra': 'extra'}
         expected = {
             '$append': {
                 '$transactions': {
@@ -214,7 +185,8 @@ class PeopleTrackerTest(TasksTestCase):
             '$distinct_id': 'test_id',
             '$token': 'testtoken',
         }
-        url_params = et._build_params(event, properties, is_test)
+        url_params = et._build_params(event, properties, is_test,
+                                      token='testtoken')
         parsed = dict(urlparse.parse_qsl(url_params, True))
         parsed['data'] = json.loads(base64.b64decode(parsed['data']))
 
@@ -230,8 +202,7 @@ class PeopleTrackerTest(TasksTestCase):
         event = 'set'
         is_test = 1
         properties = {'stuff': 'thing', 'blue': 'green',
-                      'distinct_id': 'test_id', 'token': 'testtoken',
-                      'ignore_time': True}
+                      'distinct_id': 'test_id', 'ignore_time': True}
 
         expected = {
             '$distinct_id': 'test_id',
@@ -242,7 +213,8 @@ class PeopleTrackerTest(TasksTestCase):
             },
             '$token': 'testtoken',
         }
-        url_params = et._build_params(event, properties, is_test)
+        url_params = et._build_params(event, properties, is_test,
+                                      token='testtoken')
         expected_params = urllib.urlencode({
             'data': base64.b64encode(json.dumps(expected)),
             'test': is_test,
@@ -255,7 +227,7 @@ class PeopleTrackerTest(TasksTestCase):
         event = 'set'
         is_test = 1
         properties = {'stuff': 'thing', 'blue': 'green',
-                      'distinct_id': 'test_id', 'token': 'testtoken'}
+                      'distinct_id': 'test_id'}
         expected = {
             '$distinct_id': 'test_id',
             '$set': {
@@ -264,7 +236,8 @@ class PeopleTrackerTest(TasksTestCase):
             },
             '$token': 'testtoken',
         }
-        url_params = et._build_params(event, properties, is_test)
+        url_params = et._build_params(event, properties, is_test,
+                                      token='testtoken')
         expected_params = urllib.urlencode({
             'data': base64.b64encode(json.dumps(expected)),
             'test': is_test,

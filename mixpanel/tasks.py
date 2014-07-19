@@ -28,7 +28,7 @@ class EventTracker(Task):
         code.
         """
 
-    def run(self, event_name, properties=None, token=None, test=None, **kwargs):
+    def run(self, event_name, properties=None, test=None, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -61,12 +61,11 @@ class EventTracker(Task):
         if effective_level == logging.DEBUG:
             httplib.HTTPConnection.debuglevel = 1
 
-        generated_properties = self._handle_properties(properties, token)
-
         url_params = self._build_params(
             event_name,
-            generated_properties,
+            properties,
             self._is_test(test),
+            **kwargs
         )
         l.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
@@ -106,20 +105,6 @@ class EventTracker(Task):
             test = mp_settings.MIXPANEL_TEST_PRIORITY
         return 1 if test else 0
 
-    def _handle_properties(self, properties, token):
-        """
-        Build a properties dictionary, accounting for the token.
-        """
-        if properties is None:
-            properties = {}
-
-        properties.setdefault('token', token or mp_settings.MIXPANEL_API_TOKEN)
-
-        l = self.get_logger()
-        l.debug('pre-encoded properties: <%s>' % repr(properties))
-
-        return properties
-
     def _get_connection(self):
         server = mp_settings.MIXPANEL_API_SERVER
 
@@ -127,10 +112,14 @@ class EventTracker(Task):
         socket.setdefaulttimeout(mp_settings.MIXPANEL_API_TIMEOUT)
         return httplib.HTTPConnection(server)
 
-    def _build_params(self, event, properties, is_test):
+    def _build_params(self, event, properties, is_test, **kwargs):
         """
-        Build HTTP params to record the given event and properties.
+        Returns a params dict in the default event format.
         """
+        # Avoid overwriting the passed-in properties.
+        properties = dict(properties or {})
+        properties.setdefault('token', (kwargs.get('token') or
+                                        mp_settings.MIXPANEL_API_TOKEN))
         params = {'event': event, 'properties': properties}
         return self._encode_params(params, is_test)
 
@@ -185,7 +174,7 @@ class PeopleTracker(EventTracker):
         'track_charge': '$append',
     }
 
-    def run(self, event_name, properties=None, token=None, test=None, **kwargs):
+    def run(self, event_name, properties=None, test=None, **kwargs):
         """
         Track a People event occurrence to mixpanel through the API.
 
@@ -203,18 +192,18 @@ class PeopleTracker(EventTracker):
         return super(PeopleTracker, self).run(
             event_name,
             properties=properties,
-            token=token,
             test=test,
             **kwargs
         )
 
-    def _build_params(self, event, properties, is_test):
+    def _build_params(self, event, properties, is_test, **kwargs):
         """
         Build HTTP params to record the given event and properties.
         """
         mp_key = self.event_map[event]
+        token = kwargs.get('token') or mp_settings.MIXPANEL_API_TOKEN
         params = {
-            '$token': properties['token'],
+            '$token': token,
             '$distinct_id': properties['distinct_id'],
         }
         if 'ignore_time' in properties:
@@ -224,7 +213,7 @@ class PeopleTracker(EventTracker):
             time = properties.get('time', datetime.datetime.now().isoformat())
             transactions = dict(
                 (k, v) for (k, v) in properties.iteritems()
-                if not k in ('token', 'distinct_id', 'ignore_time', 'amount')
+                if not k in ('distinct_id', 'ignore_time', 'amount')
             )
 
             transactions['$time'] = time
@@ -232,11 +221,11 @@ class PeopleTracker(EventTracker):
             params[mp_key] = {'$transactions': transactions}
 
         else:
-            # strip token and distinct_id out of the properties and use the
+            # strip distinct_id out of the properties and use the
             # rest for passing with $set and $increment
             params[mp_key] = dict(
                 (k, v) for (k, v) in properties.iteritems()
-                if not k in ('token', 'distinct_id', 'ignore_time')
+                if not k in ('distinct_id', 'ignore_time')
             )
 
         return self._encode_params(params, is_test)
@@ -255,7 +244,7 @@ class FunnelEventTracker(EventTracker):
         """Required properties were missing from the funnel-tracking call"""
         pass
 
-    def run(self, funnel, step, goal, properties, token=None, test=None, **kwargs):
+    def run(self, funnel, step, goal, properties, test=None, **kwargs):
         """
         Track an event occurrence to mixpanel through the API.
 
@@ -274,7 +263,6 @@ class FunnelEventTracker(EventTracker):
         """
         l = self.get_logger(**kwargs)
         l.info("Recording funnel: <%s>-<%s>" % (funnel, step))
-        properties = self._handle_properties(properties, token)
 
         properties = self._add_funnel_properties(
             properties,
@@ -287,6 +275,7 @@ class FunnelEventTracker(EventTracker):
             mp_settings.MIXPANEL_FUNNEL_EVENT_ID,
             properties,
             self._is_test(test),
+            **kwargs
         )
         l.debug("url_params: <%s>" % url_params)
         conn = self._get_connection()
