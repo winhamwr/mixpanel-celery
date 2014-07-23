@@ -152,6 +152,7 @@ tasks.register(EventTracker)
 
 
 class PeopleTracker(EventTracker):
+    name = "mixpanel.tasks.PeopleTracker"
     endpoint = mp_settings.MIXPANEL_PEOPLE_ENDPOINT
     event_map = {
         'add': '$add',
