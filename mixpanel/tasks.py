@@ -148,8 +148,6 @@ class EventTracker(Task):
 
         return True
 
-tasks.register(EventTracker)
-
 
 class PeopleTracker(EventTracker):
     name = "mixpanel.tasks.PeopleTracker"
@@ -252,8 +250,6 @@ class PeopleTracker(EventTracker):
 
         return params
 
-tasks.register(PeopleTracker)
-
 
 class FunnelEventTracker(EventTracker):
     """
@@ -303,5 +299,3 @@ class FunnelEventTracker(EventTracker):
         properties['goal'] = goal
 
         return properties
-
-tasks.register(FunnelEventTracker)
