@@ -4,6 +4,28 @@ Changelog
 0.8.0
 -----
 
+Instantiated trackers
+~~~~~~~~~~~~~~~~~~~~~
+
+The calling syntax for the trackers includes instantiating like this::
+
+    from mixpanel.tasks import EventTracker
+
+    EventTracker()(...)
+    EventTracker().run(...)    # same as previous
+    EventTracker().delay(...)
+
+Internally Celery maintains a singleton for each class, so there's no point
+in instantiating each time.  So now we have pre-instantiated objects that
+are easier to call::
+
+    from mixpanel.tasks import event_tracker
+
+    event_tracker(...)
+    event_tracker.delay(...)
+
+The other two are ``people_tracker`` and ``funnel_tracker``, natch.
+
 PeopleTracker features
 ~~~~~~~~~~~~~~~~~~~~~~
 

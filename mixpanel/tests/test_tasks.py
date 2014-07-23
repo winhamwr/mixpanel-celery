@@ -16,7 +16,9 @@ except ImportError:
     # Celery 3.1 removed the eager_tasks decorator
     from mixpanel.tests.utils import eager_tasks
 
-from mixpanel.tasks import EventTracker, PeopleTracker, FunnelEventTracker
+from mixpanel.tasks import (EventTracker, event_tracker,
+                            PeopleTracker, people_tracker,
+                            FunnelEventTracker, funnel_tracker)
 from mixpanel.conf import settings as mp_settings
 
 
@@ -182,6 +184,22 @@ class EventTrackerTest(TasksTestCase):
 
         self.assertTrue(result)
 
+    def test_instantiated_event_tracker(self):
+        result = event_tracker('event_foo')
+        self.assertTrue(result)
+        self.assertParams({
+            'event': 'event_foo',
+            'properties': {'token': 'testtesttest'}
+        })
+
+    def test_instantiated_event_tracker_delay(self):
+        with eager_tasks():
+            result = event_tracker.delay('event_foo')
+        self.assertTrue(result)
+        self.assertParams({
+            'event': 'event_foo',
+            'properties': {'token': 'testtesttest'}
+        })
 
 class PeopleTrackerTest(TasksTestCase):
 
@@ -264,6 +282,32 @@ class PeopleTrackerTest(TasksTestCase):
             '$unset': ['y', 'z'],
         })
 
+    def test_instantiated_people_tracker(self):
+        result = people_tracker('set', {
+            'distinct_id': 'x',
+            'foo': 'bar',
+        })
+        self.assertTrue(result)
+        self.assertParams({
+            '$distinct_id': 'x',
+            '$token': 'testtesttest',
+            '$set': {'foo': 'bar'},
+        })
+
+    def test_instantiated_people_tracker_delay(self):
+        with eager_tasks():
+            result = people_tracker.delay('set', {
+                'distinct_id': 'x',
+                'foo': 'bar',
+            })
+        self.assertTrue(result)
+        self.assertParams({
+            '$distinct_id': 'x',
+            '$token': 'testtesttest',
+            '$set': {'foo': 'bar'},
+        })
+
+
 class BrokenRequestsTest(TasksTestCase):
 
     def test_failed_request(self):
@@ -333,6 +377,35 @@ class FunnelEventTrackerTest(TasksTestCase):
         fet = FunnelEventTracker()
         result = fet.run(funnel, step, goal, {'distinct_id': 'test_user'})
 
+        self.assertTrue(result)
+        self.assertParams({
+            'event': 'mp_funnel',
+            'properties': {
+                'distinct_id': 'test_user',
+                'funnel': 'test_funnel',
+                'goal': 'test_goal',
+                'step': 'test_step',
+                'token': 'testtesttest'}
+        })
+
+    def test_instantiated_funnel_tracker(self):
+        result = funnel_tracker('test_funnel', 'test_step', 'test_goal',
+                                {'distinct_id': 'test_user'})
+        self.assertTrue(result)
+        self.assertParams({
+            'event': 'mp_funnel',
+            'properties': {
+                'distinct_id': 'test_user',
+                'funnel': 'test_funnel',
+                'goal': 'test_goal',
+                'step': 'test_step',
+                'token': 'testtesttest'}
+        })
+
+    def test_instantiated_funnel_tracker_delay(self):
+        with eager_tasks():
+            result = funnel_tracker.delay('test_funnel', 'test_step', 'test_goal',
+                                          {'distinct_id': 'test_user'})
         self.assertTrue(result)
         self.assertParams({
             'event': 'mp_funnel',
