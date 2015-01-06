@@ -25,13 +25,15 @@ Have Celery running and want to asynchronously track an event?
 Is your event called `my_event`?
 You're in luck!
 
-    from mixpanel.tasks import EventTracker
+```python
+from mixpanel.tasks import EventTracker
 
-    EventTracker.delay(
-        'my_event',
-        {'distinct_id': 1},
-        token='YOUR_API_TOKEN',
-    )
+EventTracker.delay(
+    'my_event',
+    {'distinct_id': 1},
+    token='YOUR_API_TOKEN',
+)
+```
 
 Boom.
 Once your Celery worker gets hold of that bad boy, it's tracked.
