@@ -232,7 +232,7 @@ class PeopleTracker(EventTracker):
         if event == 'track_charge':
             # If time was given as a kwarg, it's already been moved to params
             # as $time. Rescue it from there, and default it otherwise.
-            time = params.pop('$time', datetime.datetime.now())
+            time = params.pop('$time', datetime.datetime.utcnow())
             if hasattr(time, 'isoformat'):
                 time = time.isoformat()
             properties['$time'] = time

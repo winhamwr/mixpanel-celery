@@ -207,8 +207,8 @@ class PeopleTrackerTest(TasksTestCase):
     def test_build_people_track_charge_params(self):
         self.maxDiff = None
         et = PeopleTracker()
-        now = datetime.now()
-        FakeDateTime.now = classmethod(lambda cls: now)
+        now = datetime.utcnow()
+        FakeDateTime.utcnow = classmethod(lambda cls: now)
         event = 'track_charge'
         properties = {'amount': 11.77, 'distinct_id': 'test_id',
                       'extra': 'extra'}
