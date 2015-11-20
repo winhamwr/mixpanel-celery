@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Mixpanel-celery by winhamwr</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>Mixpanel-celery</h1>
+        <p>Asynchronous event tracking for Mixpanel using Celery</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/winhamwr/mixpanel-celery" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/winhamwr/mixpanel-celery/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/winhamwr/mixpanel-celery/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <h1>
+<a id="mixpanel-celery" class="anchor" href="#mixpanel-celery" aria-hidden="true"><span class="octicon octicon-link"></span></a>mixpanel-celery</h1>
+
+<p>Asynchronous event tracking for Mixpanel</p>
+
+<p><a href="https://travis-ci.org/winhamwr/mixpanel-celery"><img src="https://travis-ci.org/winhamwr/mixpanel-celery.png?branch=master" alt="Build Status"></a></p>
+
+<p>mixpanel-celery helps you use <a href="http://celeryproject.org">Celery</a>
+to asynchronously track your
+<a href="http://mixpanel.com">Mixpanel</a> events.
+Waiting on HTTP requests to Mixpanel's api to complete
+every time you want to record something slows you down.
+Using mixpanel-celery gives you all of the Mixpanel goodness
+without any of the potential performance impact.</p>
+
+<h2>
+<a id="works-wherever-celery-works" class="anchor" href="#works-wherever-celery-works" aria-hidden="true"><span class="octicon octicon-link"></span></a>Works wherever Celery works</h2>
+
+<p>mixpanel-celery works great with Django,
+but because Celery works with just python,
+so does mixpanel-celery.</p>
+
+<h2>
+<a id="but-how-do-i-do-the-thing" class="anchor" href="#but-how-do-i-do-the-thing" aria-hidden="true"><span class="octicon octicon-link"></span></a>But how do I do the thing?</h2>
+
+<p>I'll tell you how!
+Have Celery running and want to asynchronously track an event?
+Is your event called <code>my_event</code>?
+You're in luck!</p>
+
+<div class="highlight highlight-source-python"><pre><span class="pl-k">from</span> mixpanel.tasks <span class="pl-k">import</span> EventTracker
+
+EventTracker.delay(
+    <span class="pl-s"><span class="pl-pds">'</span>my_event<span class="pl-pds">'</span></span>,
+    {<span class="pl-s"><span class="pl-pds">'</span>distinct_id<span class="pl-pds">'</span></span>: <span class="pl-c1">1</span>},
+    <span class="pl-smi">token</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>YOUR_API_TOKEN<span class="pl-pds">'</span></span>,
+)</pre></div>
+
+<p>Boom.
+Once your Celery worker gets hold of that bad boy, it's tracked.</p>
+
+<h2>
+<a id="full-on-docs" class="anchor" href="#full-on-docs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Full-on Docs</h2>
+
+<p>Would you like to know more?
+Well then you should <a href="http://mixpanel-celery.readthedocs.org">read the docs</a>,
+<a href="http://tvtropes.org/pmwiki/pmwiki.php/Film/StarshipTroopers">citizen</a>.</p>
+
+<h2>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<p>We love pull requests!
+Send us one, and you'll probably make Wes's day.</p>
+
+<p>For details,
+check out the
+<a href="http://mixpanel-celery.readthedocs.org/en/latest/contributing.html">contribution tips</a>
+documentation.</p>
+
+<h2>
+<a id="we-like-mixpanel-and-celery" class="anchor" href="#we-like-mixpanel-and-celery" aria-hidden="true"><span class="octicon octicon-link"></span></a>We like Mixpanel and Celery</h2>
+
+<p>This project isn't affiliated with the Mixpanel company.
+Just a customer's implementation of a client for their service.</p>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/winhamwr">winhamwr</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
