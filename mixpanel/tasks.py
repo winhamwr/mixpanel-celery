@@ -2,14 +2,14 @@ from __future__ import absolute_import, unicode_literals
 
 import base64
 import datetime
-import httplib
 import json
 import logging
 import socket
-import urllib
+import sys
 
 from celery.task import Task
 from celery.registry import tasks
+from six.moves import http_client, urllib
 
 from .conf import settings as mp_settings
 
@@ -59,7 +59,7 @@ class EventTracker(Task):
             effective_level = l.logger.getEffectiveLevel()
 
         if effective_level == logging.DEBUG:
-            httplib.HTTPConnection.debuglevel = 1
+            http_client.HTTPConnection.debuglevel = 1
 
         params = self._build_params(event_name, properties, **kwargs)
         l.debug('params: <%r>' % (params,))
@@ -92,7 +92,7 @@ class EventTracker(Task):
 
         # Wish we could use python 2.6's httplib timeout support
         socket.setdefaulttimeout(mp_settings.MIXPANEL_API_TIMEOUT)
-        return httplib.HTTPConnection(server)
+        return http_client.HTTPConnection(server)
 
     def _build_params(self, event, properties, **kwargs):
         """
@@ -109,13 +109,13 @@ class EventTracker(Task):
         Encodes data and returns the urlencoded parameters.
         """
         key = mp_settings.MIXPANEL_DATA_VARIABLE
-        value = base64.b64encode(json.dumps(params))
+        value = base64.b64encode(json.dumps(params).encode('utf8'))
         data = {key: value}
         if test is None:
             test = mp_settings.MIXPANEL_TEST_PRIORITY
         if test:
             data['test'] = '1'
-        return urllib.urlencode(data)
+        return urllib.parse.urlencode(data)
 
     def _send_request(self, connection, params):
         """
@@ -128,10 +128,10 @@ class EventTracker(Task):
             connection.request('GET', '%s?%s' % (self.endpoint, params))
 
             response = connection.getresponse()
-        except socket.error, message:
+        except socket.error:
             raise self.FailedEventRequest(
                 "The tracking request failed with a socket error. "
-                "Message: [%s]" % message
+                "Message: [%s]" % sys.exc_info()[1].message
             )
 
         if response.status != 200 or response.reason != 'OK':
