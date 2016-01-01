@@ -14,6 +14,11 @@ CLASSIFIERS = [
     "License :: OSI Approved :: BSD License",
     "Operating System :: POSIX",
     "Programming Language :: Python",
+    'Programming Language :: Python :: 2.6',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3.3',
+    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
     "Topic :: Internet",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -108,17 +113,15 @@ class RunDjangoTests(Command):
         os.chdir(django_testproj_dir)
         sys.path.append(django_testproj_dir)
 
-        from django.core.management import execute_manager
-        os.environ['DJANGO_SETTINGS_MODULE'] = os.environ.get(
+        from django.core.management import execute_from_command_line
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', os.environ.get(
             'DJANGO_SETTINGS_MODULE',
             'testproj.settings',
-        )
-        settings_file = os.environ['DJANGO_SETTINGS_MODULE']
-        settings_mod = __import__(settings_file, {}, {}, [''])
+        ))
         prev_argv = list(sys.argv)
         try:
             sys.argv = [__file__, 'test'] + self.extra_args
-            execute_manager(settings_mod, argv=sys.argv)
+            execute_from_command_line(argv=sys.argv)
         finally:
             sys.argv = prev_argv
 

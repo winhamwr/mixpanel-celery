@@ -5,9 +5,9 @@ import json
 import logging
 import socket
 import unittest
-import urllib
-import urlparse
 from datetime import datetime
+from six import text_type
+from six.moves import urllib
 
 from mock import call, patch, MagicMock as Mock
 try:
@@ -62,11 +62,11 @@ class TasksTestCase(unittest.TestCase):
         args = self.conn.request.call_args[0]
         self.assertEqual(args[0], 'GET')
         path, qs = args[1].split('?', 1)
-        return dict(urlparse.parse_qsl(qs, keep_blank_values=True))
+        return dict(urllib.parse.parse_qsl(qs, keep_blank_values=True))
 
     def assertParams(self, expected):
         parsed = self.get_querystring_dict()
-        params = json.loads(base64.b64decode(parsed['data']))
+        params = json.loads(base64.b64decode(parsed['data']).decode('utf8'))
         self.assertEqual(params, expected)
 
 
@@ -123,8 +123,8 @@ class EventTrackerTest(TasksTestCase):
         params = et._build_params(event, properties)
         url_params = et._encode_params(params, test)
 
-        expected_params = urllib.urlencode({
-            'data': base64.b64encode(json.dumps(params)),
+        expected_params = urllib.parse.urlencode({
+            'data': base64.b64encode(json.dumps(params).encode('utf8')),
             'test': '1'
         })
 
@@ -217,7 +217,7 @@ class PeopleTrackerTest(TasksTestCase):
             '$append': {
                 '$transactions': {
                     '$amount': 11.77,
-                    '$time': unicode(now.isoformat()),
+                    '$time': text_type(now.isoformat()),
                     'extra': 'extra'
                 }
             },
