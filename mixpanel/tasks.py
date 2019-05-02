@@ -8,7 +8,6 @@ import socket
 import sys
 
 from celery.task import Task
-from celery.registry import tasks
 from six.moves import http_client, urllib
 
 from .conf import settings as mp_settings
@@ -43,29 +42,31 @@ class EventTracker(Task):
         putting the events on a high-priority queue at Mixpanel for testing
         purposes.
         """
-        l = self.get_logger(**kwargs)
+        logger = self.get_logger(**kwargs)
         if mp_settings.MIXPANEL_DISABLE:
-            l.info("Mixpanel disabled; not recording event: <%s>" % event_name)
+            logger.info(
+                "Mixpanel disabled; not recording event: <%s>" % event_name,
+            )
             return False
 
-        l.info("Recording event: <%s>" % event_name)
+        logger.info("Recording event: <%s>" % event_name)
 
         # Celery 3.x changed the way the logger could be accessed
-        if hasattr(l, 'getEffectiveLevel'):
+        if hasattr(logger, 'getEffectiveLevel'):
             # celery 3.x
-            effective_level = l.getEffectiveLevel()
+            effective_level = logger.getEffectiveLevel()
         else:
             # Fall back to celery 2.x support
-            effective_level = l.logger.getEffectiveLevel()
+            effective_level = logger.logger.getEffectiveLevel()
 
         if effective_level == logging.DEBUG:
             http_client.HTTPConnection.debuglevel = 1
 
         params = self._build_params(event_name, properties, **kwargs)
-        l.debug('params: <%r>' % (params,))
+        logger.debug('params: <%r>' % (params,))
 
         url_params = self._encode_params(params, test)
-        l.debug('encoded: <%s>' % (url_params,))
+        logger.debug('encoded: <%s>' % (url_params,))
 
         conn = self._get_connection()
 
@@ -73,7 +74,7 @@ class EventTracker(Task):
             result = self._send_request(conn, url_params)
         except self.FailedEventRequest as e:
             conn.close()
-            l.info("Event failed. Retrying: <%s>" % event_name)
+            logger.info("Event failed. Retrying: <%s>" % event_name)
             self.retry(
                 exc=e,
                 countdown=mp_settings.MIXPANEL_RETRY_DELAY,
@@ -81,9 +82,9 @@ class EventTracker(Task):
             return
         conn.close()
         if result:
-            l.info("Event recorded/logged: <%s>" % event_name)
+            logger.info("Event recorded/logged: <%s>" % event_name)
         else:
-            l.info("Event ignored: <%s>" % event_name)
+            logger.info("Event ignored: <%s>" % event_name)
 
         return result
 
@@ -147,6 +148,7 @@ class EventTracker(Task):
             return False
 
         return True
+
 
 event_tracker = EventTracker()
 
@@ -252,6 +254,7 @@ class PeopleTracker(EventTracker):
 
         return params
 
+
 people_tracker = PeopleTracker()
 
 
@@ -276,8 +279,8 @@ class FunnelEventTracker(EventTracker):
         ``properties`` is a dictionary of key/value pairs
         describing the funnel event. A ``distinct_id`` is required.
         """
-        l = self.get_logger(**kwargs)
-        l.info("Recording funnel: <%s>-<%s>" % (funnel, step))
+        logger = self.get_logger(**kwargs)
+        logger.info("Recording funnel: <%s>-<%s>" % (funnel, step))
 
         properties = self._add_funnel_properties(
             properties,
@@ -303,5 +306,6 @@ class FunnelEventTracker(EventTracker):
         properties['goal'] = goal
 
         return properties
+
 
 funnel_tracker = FunnelEventTracker()

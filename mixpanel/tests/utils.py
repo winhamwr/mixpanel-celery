@@ -11,12 +11,12 @@ from celery.app import app_or_default
 def eager_tasks():
     app = app_or_default()
 
-    prev = app.conf.CELERY_ALWAYS_EAGER
-    app.conf.CELERY_ALWAYS_EAGER = True
+    prev = app.conf.task_always_eager
+    app.conf.task_always_eager = True
     try:
         yield True
     finally:
-        app.conf.CELERY_ALWAYS_EAGER = prev
+        app.conf.task_always_eager = prev
 
 
 def with_eager_tasks(fun):
@@ -24,9 +24,9 @@ def with_eager_tasks(fun):
     @wraps(fun)
     def _inner(*args, **kwargs):
         app = app_or_default()
-        prev = app.conf.CELERY_ALWAYS_EAGER
-        app.conf.CELERY_ALWAYS_EAGER = True
+        prev = app.conf.task_always_eager
+        app.conf.task_always_eager = True
         try:
             return fun(*args, **kwargs)
         finally:
-            app.conf.CELERY_ALWAYS_EAGER = prev
+            app.conf.task_always_eager = prev

@@ -30,7 +30,6 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'djcelery',
     'mixpanel',
     'django_nose',
 )
@@ -39,7 +38,7 @@ NOSE_ARGS = [
     os.path.join(here, os.pardir, 'mixpanel', 'tests'),
     os.environ.get("NOSE_VERBOSE") and "--verbose" or "",
 ]
-TEST_RUNNER = 'django_nose.run_tests'
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 MIXPANEL_API_TOKEN = 'testmixpanel'
 
@@ -56,6 +55,3 @@ BROKER_POOL_LIMIT = 0
 CELERY_RESULT_BACKEND = 'cache'
 
 CELERY_SEND_TASK_ERROR_EMAILS = False
-
-import djcelery
-djcelery.setup_loader()
