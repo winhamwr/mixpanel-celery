@@ -8,17 +8,17 @@ import unittest
 from datetime import datetime
 from six import text_type
 from six.moves import urllib
+from mock import patch
 
-from mock import call, patch, MagicMock as Mock
-try:
-    from celery.tests.utils import eager_tasks
-except ImportError:
-    # Celery 3.1 removed the eager_tasks decorator
-    from mixpanel.tests.utils import eager_tasks
-
-from mixpanel.tasks import (EventTracker, event_tracker,
-                            PeopleTracker, people_tracker,
-                            FunnelEventTracker, funnel_tracker)
+from mixpanel.tests.utils import eager_tasks
+from mixpanel.tasks import (
+    EventTracker,
+    event_tracker,
+    PeopleTracker,
+    people_tracker,
+    FunnelEventTracker,
+    funnel_tracker,
+)
 from mixpanel.conf import settings as mp_settings
 
 
@@ -47,19 +47,40 @@ class TasksTestCase(unittest.TestCase):
 
     def patch_network(self):
         self.old_get_connection = EventTracker._get_connection
-        self.conn = Mock()
+
+        class Response(object):
+            status = 200
+            reason = 'OK'
+
+            def read(*args, **kwargs):
+                return '1'
+        response = Response()
+        self.response = response
+
+        class Connection(object):
+            def __init__(self, *args, **kwargs):
+                self._request_call_args = []
+
+            def getresponse(self, *args, **kwargs):
+                return response
+
+            def request(self, *args, **kwargs):
+                self._request_call_args.append(args)
+
+            @property
+            def request_call_args(self):
+                return self._request_call_args
+
+            def close(self, *args, **kwargs):
+                pass
         EventTracker._get_connection = lambda task: self.conn
-        self.response = Mock()
-        self.conn.getresponse.return_value = self.response
-        self.response.status = 200
-        self.response.reason = 'OK'
-        self.response.read.return_value = '1'
+        self.conn = Connection()
 
     def unpatch_network(self):
         EventTracker._get_connection = self.old_get_connection
 
     def get_querystring_dict(self):
-        args = self.conn.request.call_args[0]
+        args = self.conn.request_call_args[0]
         self.assertEqual(args[0], 'GET')
         path, qs = args[1].split('?', 1)
         return dict(urllib.parse.parse_qsl(qs, keep_blank_values=True))
@@ -167,7 +188,9 @@ class EventTrackerTest(TasksTestCase):
 
     def test_non_recorded(self):
         """non-recorded events should return False"""
-        self.response.read.return_value = '0'
+        def new_read(*args, **kwargs):
+            return '0'
+        self.response.read = new_read
 
         et = EventTracker()
         # Times older than 3 hours don't get recorded according to:
@@ -201,8 +224,8 @@ class EventTrackerTest(TasksTestCase):
             'properties': {'token': 'testtesttest'}
         })
 
-class PeopleTrackerTest(TasksTestCase):
 
+class PeopleTrackerTest(TasksTestCase):
     @patch('mixpanel.tasks.datetime.datetime', FakeDateTime)
     def test_build_people_track_charge_params(self):
         self.maxDiff = None
@@ -317,7 +340,10 @@ class BrokenRequestsTest(TasksTestCase):
         self.assertNotEqual(result.traceback, None)
 
     def test_failed_socket_request(self):
-        self.response.read = Mock(side_effect=socket.error('BOOM'))
+        def new_read(*args, **kwargs):
+            raise socket.error('BOOM')
+
+        self.response.read = new_read
         with eager_tasks():
             result = EventTracker.delay('event_foo')
         self.assertNotEqual(result.traceback, None)
@@ -404,8 +430,12 @@ class FunnelEventTrackerTest(TasksTestCase):
 
     def test_instantiated_funnel_tracker_delay(self):
         with eager_tasks():
-            result = funnel_tracker.delay('test_funnel', 'test_step', 'test_goal',
-                                          {'distinct_id': 'test_user'})
+            result = funnel_tracker.delay(
+                'test_funnel',
+                'test_step',
+                'test_goal',
+                {'distinct_id': 'test_user'},
+            )
         self.assertTrue(result)
         self.assertParams({
             'event': 'mp_funnel',
