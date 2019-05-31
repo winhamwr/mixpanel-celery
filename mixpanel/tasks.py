@@ -144,7 +144,7 @@ class EventTracker(Task):
 
         # Successful requests will generate a log
         response_data = response.read()
-        if response_data != '1':
+        if response_data != b'1':
             return False
 
         return True
