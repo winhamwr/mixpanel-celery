@@ -53,7 +53,7 @@ class TasksTestCase(unittest.TestCase):
             reason = 'OK'
 
             def read(*args, **kwargs):
-                return '1'
+                return b'1'
         response = Response()
         self.response = response
 
