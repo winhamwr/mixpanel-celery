@@ -224,6 +224,20 @@ class EventTrackerTest(TasksTestCase):
             'properties': {'token': 'testtesttest'}
         })
 
+    def test_socket_error_replaced_with_failed_event_request(self):
+        class FakeConnection(object):
+            def request(self, *args, **kwargs):
+                pass
+
+            def getresponse(self):
+                raise socket.error('BOOM')
+
+        et = EventTracker()
+
+        fake_connection = FakeConnection()
+        with self.assertRaises(EventTracker.FailedEventRequest):
+            et._send_request(fake_connection, {})
+
 
 class PeopleTrackerTest(TasksTestCase):
     @patch('mixpanel.tasks.datetime.datetime', FakeDateTime)

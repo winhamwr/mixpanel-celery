@@ -132,7 +132,7 @@ class EventTracker(Task):
         except socket.error:
             raise self.FailedEventRequest(
                 "The tracking request failed with a socket error. "
-                "Message: [%s]" % sys.exc_info()[1].message
+                "Message: [%s]" % str(sys.exc_info()[1])
             )
 
         if response.status != 200 or response.reason != 'OK':
